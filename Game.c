@@ -210,12 +210,12 @@ MoveInfo GetMove(Game* new_game, Square* to, Square* from)
 	if (isvalid)
 	{
 		//SprawdŸ czy po wykonaniu ruchu mój król jest w szachu, jeœli jest zwróæ informacjê ¿e ruch nie jest prawid³owy.
-		if (IsActualPlayerKingInDanger)
+		if (false)
 			return INVALID_MOVE_ACTUAL_KING_IS_IN_DANGER;
 		//Wykonaj ruch.
-		if (IsOpponentKingInDanger)
+		if (true)
 		{
-			SetCheckState(new_game);
+			//SetCheckState(new_game);
 			return VALID_MOVE_OPPONENT_KING_IS_IN_DANGER;
 		}
 			return VALID_MOVE;

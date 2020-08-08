@@ -12,8 +12,8 @@ typedef struct square
 typedef struct history
 {
     struct history* pNext;
-    Square from;
-    Square to;
+    Square *from;
+    Square *to;
 }HistoryElement;
 
 /**Funkcja sprawdza czy pole znajduje siê na szachownicy
@@ -35,8 +35,12 @@ bool AddAnElement(Square *from, Square *to, HistoryElement* pHead);
 @return true je¿eli historia rozgrywki zosta³a zapisana poprawnie w przeciwnym wypadku false*/
 bool SaveToFile();
 
+/**Pomocnicza funkcja wypisuj¹ca elementy listy na ekranie
+@param pHead wskaŸnik na pocz¹tek listy jednokierunkowej*/
+void PrintOnTheScreen (HistoryElement *pHead);
+
 /**Usuwa listê jednokierunkow¹ rekurencyjnie od koñca.
 @param pHead wskaŸnik na pierwszy element listy jednokierunkowej
 @return true je¿eli lista zosta³a usuniêta poprawnie lub by³a pusta, w przeciwnym wypadku false*/
-bool RemoveFormMemory();
+bool RemoveFormMemory(HistoryElement *pHead);
 #endif

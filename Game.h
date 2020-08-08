@@ -46,7 +46,7 @@ typedef enum squaretype
     killed, //pole dozwolone, nastąpi zbicie figury przeciwnika
     threatened, //pole niedozwolone, król aktualnego gracza będzie w szachu
     killed_and_threatened,//pole niedozwolone, możliwe zbicie, jednak król aktualnego gracza będzie w szachu
-    king_threatened,//pole dozwolone, król przeciwnika jest w szachu
+    opponent_king_threatened,//pole dozwolone, król przeciwnika jest w szachu
 }SquareType;
 
 /**Szachownica zawierająca pola w raz z typami możliwych ruchów do wykonania*/
@@ -165,13 +165,13 @@ void PawnPromotion(Game* new_game, Square* to);
 MoveInfo GetMove(Game* new_game, Square* from, Square* to);
 
 /*Sprawdza, czy król aktualnego gracza jest w szachu*/
-bool IsActualPlayerKingInDanger();
+//bool IsActualPlayerKingInDanger();
 
 /*Sprawdza, czy król przeciwnika jest w szachu*/
-bool IsOpponentKingInDanger();
+//bool IsOpponentKingInDanger();
 
 /*Ustawia ole odpowiedniego gracza w szachu*/
-void SetCheckState(Game* new_game);
+//void SetCheckState(Game* new_game);
 #endif
 
  
