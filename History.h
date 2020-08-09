@@ -16,6 +16,17 @@ typedef struct history
     Square *to;
 }HistoryElement;
 
+/**Funkcja alokuje pamiêæ dla struktury Square i nadaje jej polom zadane wartoœci
+@param row wiersz w którym znajduje siê pole
+@param column kolumna w której znajduje siê pole
+@return wskaŸnik na nowo utworzon¹ strukturê, jeœli struktura nie zosta³a poprawnie zaalokowana w pamiêci, wskaŸnik ma wartoœæ NULL
+@waring funkcja alokuje pamiêæ*/
+Square* CreateNewSquare(int row, int column);
+
+/**Funkcja usuwaj¹ca dynamicznie zaalokowan¹ strukturê quare z pamiêci
+@param suare_t*/
+void Remove
+
 /**Funkcja sprawdza czy pole znajduje siê na szachownicy
 @param boardsquare pole które chcemy sprawdziæ
 @return true jeœli pole znajduje siê na szachownicy, w przeciwnym wypadku false.*/
@@ -27,7 +38,7 @@ bool IsOnTheChessboard(Square* boardsquare);
 @param pHead wskaŸnik na pocz¹tek listy jednokierunkowej
 @return true je¿eli element zosta³ dodany poprawnie, w przeciwnym wypadku false
 @warning Funkcja alokuje pamiêæ!*/
-bool AddAnElement(Square *from, Square *to, HistoryElement* pHead);
+bool AddAnElement(Square **from, Square **to, HistoryElement** pHead);
 
 /**Saves the game history to the file
 @param pHead wskaŸnik na pocz¹tek listy jednokierunkowej
@@ -35,12 +46,11 @@ bool AddAnElement(Square *from, Square *to, HistoryElement* pHead);
 @return true je¿eli historia rozgrywki zosta³a zapisana poprawnie w przeciwnym wypadku false*/
 bool SaveToFile();
 
-/**Pomocnicza funkcja wypisuj¹ca elementy listy na ekranie
+/**Pomocnicza funkcja wypisuj¹ca elementy listy na ekranie (od pierwszego elementu).
 @param pHead wskaŸnik na pocz¹tek listy jednokierunkowej*/
 void PrintOnTheScreen (HistoryElement *pHead);
 
-/**Usuwa listê jednokierunkow¹ rekurencyjnie od koñca.
-@param pHead wskaŸnik na pierwszy element listy jednokierunkowej
-@return true je¿eli lista zosta³a usuniêta poprawnie lub by³a pusta, w przeciwnym wypadku false*/
-bool RemoveFormMemory(HistoryElement *pHead);
+/**Usuwa listê jednokierunkow¹ iteracyjnie od pocz¹tku
+@param pHead wskaŸnik na pierwszy element listy jednokierunkowej*/
+void RemoveFormMemory(HistoryElement **pHead);
 #endif

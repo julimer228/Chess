@@ -33,10 +33,12 @@ int main(int argc, char* argv[])
 
 	AddAnElement(&a1,&a1,&pHead);
 	AddAnElement(&a2, &a2, &pHead);
-	AddAnElement(&a3, &a3, &pHead);
+	Square *new_square=CreateNewSquare(6, 66);
+	AddAnElement(&new_square, &new_square, &pHead);
 	AddAnElement(&a4, &a4, &pHead);
 	AddAnElement(&a5, &a5, &pHead);
 	AddAnElement(&a6, &a6, &pHead);
 	PrintOnTheScreen(pHead);
+	RemoveFormMemory(&pHead);
 
 }

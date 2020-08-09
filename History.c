@@ -1,5 +1,16 @@
 #include "History.h"
 
+Square* CreateNewSquare(int row, int column)
+{
+	Square* new_square = (Square*)malloc(sizeof(Square));
+	if (new_square != NULL)
+	{
+		new_square->row = row;
+		new_square->column = column;
+	}
+	return new_square;
+}
+
 bool IsOnTheChessboard(Square* boardsquare)
 {
 	if (boardsquare->column >= 0 && boardsquare->column < 8 && boardsquare->row < 8 && boardsquare->row >= 0)
@@ -9,11 +20,11 @@ bool IsOnTheChessboard(Square* boardsquare)
 
 bool AddAnElement(Square **from, Square **to, HistoryElement** pHead)
 {
-	HistoryElement* new_element = (HistoryElement*)malloc(sizeof(HistoryElement));
-	new_element->from = *from;
-	new_element->to = *to;
-	new_element->pNext = *pHead;
-	*pHead = new_element;
+	HistoryElement* element_t = (HistoryElement*)malloc(sizeof(HistoryElement));
+	element_t->from = *from;
+	element_t->to = *to;
+	element_t->pNext = *pHead;
+	*pHead = element_t;
 }
 
 void PrintOnTheScreen(HistoryElement *pHead)
@@ -29,10 +40,15 @@ void PrintOnTheScreen(HistoryElement *pHead)
 	}
 }
 
-bool RemoveFormMemory(HistoryElement *pHead)
+void RemoveFormMemory(HistoryElement** pHead)
 {
-	if (pHead)
-		RemoveFormMemory(pHead->pNext);
-	free(pHead);
-	printf("Usunieto\n");
+	HistoryElement* element_t = *pHead;
+	while (*pHead)
+	{
+		*pHead = (*pHead)->pNext;
+	//	printf("Deleting %d\n", element_t->from->column); //Pomocnicze wyœwietlanie usuwanych elementów na ekran
+		free(element_t);
+		element_t= *pHead;
+	}
+	
 }
