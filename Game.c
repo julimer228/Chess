@@ -84,76 +84,200 @@ bool IsEnemy(Square* to, Square* from, Game* new_game)
 	return false;
 }
 
-bool KnightMove(Game* new_game, Square *from, Square *to)
+void PawnMove(chessboard Chessboard, Square* from, bool tab[SIZE][SIZE])
 {
-	if (abs(from->row - to->row) == 2 && abs(from->column - to->column) == 1)
-		return true;
-	if (abs(from->row - to->row) == 1 && abs(from->column - to->column) == 2)
-		return true;
-	
-	return false;
-}
-
-bool BishopMove(Game* new_game, Square *from, Square *to)
-{
-	if (abs(from->column - to->column) == abs(from->row - to->row))
+	if (Chessboard[from->row + 1][from->column + 1] == EMPTY)
 	{
-		if ((from->row > to->row) && (from->column < to->column))//ruch w kierunku prawego górnego rogu
+		tab[from->row + 1][from->column] = true;
+		if ((Chessboard[from->row][from->column] == 1) && (Chessboard[from->row + 2][from->column] == EMPTY))
 		{
-			for (int i = 1; i < abs(from->column - to->column); i++)
-			{
-				if (new_game->Chessboard[from->row-i][from->column+i] != EMPTY)
-					return false;
-				return true;
-			}
-		}
-		if ((from->row > to->row) && (from->column < to->column))	//ruch w kierunku lewego górnego rogu
-		{
-			for (int i = 1; i < abs(from->column - to->column); i++)
-			{
-				if (new_game->Chessboard[from->row-i][from->column-i] != EMPTY)
-					return false;
-				return true;
-			}
-		}
-		if ((from->row > to->row) && (from->column < to->column))	//ruch w kierunku prawego dolnego rogu
-		{
-			for (int i = 1; i < abs(from->column - to->column); i++)
-			{
-				if (new_game->Chessboard[from->row+i][from->column+i] != EMPTY)
-					return false;
-				return true;
-			}
-		}
-		if ((from->row > to->row) && (from->column < to->column))	//ruch w kierunku lewego dolnego rogu
-		{
-			for (int i = 1; i < abs(from->column - to->column); i++)
-			{
-				if (new_game->Chessboard[from->row+i][from->column-i] != EMPTY)
-					return false;
-				return true;
-			}
+			tab[from->row + 2][from->column] = true;
 		}
 	}
-	return false;
+	//Zbicia po skosie (jeœli stoi tam bierka przeciwnika)
+	if (Chessboard[from->row + 1][from->column + 1] < 0)
+		tab[from->row + 1][from->column + 1] = true;
+	if (Chessboard[from->row + 1][from->column - 1] < 0)
+		tab[from->row + 1][from->column - 1] = true;
 }
 
-bool QueenMove(Game* new_game, Square *from, Square *to)
+bool RookMove(chessboard Chessboard, Square* from, bool tab[SIZE][SIZE])
 {
+	for (int i = 1; from->row + i < SIZE; i++)
+	{
+		if (Chessboard[from->row + i][from->column] > 0)
+			break;
+		if (Chessboard[from->row + i][from->column] < 0)
+		{
+			tab[from->row + i][from->column] = true;
+			break;
+		}
+		if (Chessboard[from->row + i][from->column] == EMPTY)
+			tab[from->row + i][from->column] = true;
+	}
+	for (int i = 1; from->row - i >=0; i++)
+	{
+		if (Chessboard[from->row - i][from->column] > 0)
+			break;
+		if (Chessboard[from->row - i][from->column] < 0)
+		{
+			tab[from->row - i][from->column] = true;
+			break;
+		}
+		if (Chessboard[from->row - i][from->column] == EMPTY)
+			tab[from->row - i][from->column] = true;
+	}
+	for (int i = 1; from->column + i < SIZE; i++)
+	{
+		if (Chessboard[from->row][from->column+i] > 0)
+			break;
+		if (Chessboard[from->row][from->column+i] < 0)
+		{
+			tab[from->row][from->column+i] = true;
+			break;
+		}
+		if (Chessboard[from->row][from->column+i] == EMPTY)
+			tab[from->row][from->column+i] = true;
+	}
+	for (int i = 1; from->column - i >= 0; i++)
+	{
+		if (Chessboard[from->row][from->column-i] > 0)
+			break;
+		if (Chessboard[from->row][from->column-i] < 0)
+		{
+			tab[from->row][from->column-i] = true;
+			break;
+		}
+		if (Chessboard[from->row][from->column-i] == EMPTY)
+			tab[from->row][from->column-i] = true;
+	}
+}
+
+void KnightMove(chessboard Chessboard, Square* from, bool tab[SIZE][SIZE])
+{
+	if((from->row+1<SIZE)&&(from->column+2<SIZE)&&((Chessboard[from->row+1][from->column+2]==EMPTY)||(Chessboard[from->row+1][from->column+2]<0))) 
+	tab[from->row+1][from->column+2] = true;
+	if((from->row-1>=0)&&(from->column-2>=0) && ((Chessboard[from->row - 1][from->column - 2] == EMPTY) || (Chessboard[from->row - 1][from->column - 2] < 0)))
+	tab[from->row-1][from->column-2] = true;
+	if ((from->row + 1 <SIZE) && (from->column - 2 >= 0) && ((Chessboard[from->row + 1][from->column - 2] == EMPTY) || (Chessboard[from->row + 1][from->column - 2] < 0)))
+	tab[from->row+1][from->column-2] = true;
+	if ((from->row - 1 >= 0) && (from->column+2 <SIZE) && ((Chessboard[from->row -1][from->column + 2] == EMPTY) || (Chessboard[from->row - 1][from->column + 2] < 0)))
+	tab[from->row-1][from->column+2] = true;
+	if ((from->row + 2<SIZE) && (from->column +1 <SIZE) && ((Chessboard[from->row + 2][from->column + 1] == EMPTY) || (Chessboard[from->row + 2][from->column + 1] < 0)))
+	tab[from->row+2][from->column+1] = true;
+	if ((from->row +2 <SIZE) && (from->column - 1 >= 0) && ((Chessboard[from->row + 2][from->column -1] == EMPTY) || (Chessboard[from->row + 2][from->column -1] < 0)))
+	tab[from->row+2][from->column-1] = true;
+	if ((from->row - 2 >= 0) && (from->column +1 <SIZE ) && ((Chessboard[from->row -2][from->column + 1] == EMPTY) || (Chessboard[from->row -2][from->column + 1] < 0)))
+	tab[from->row-2][from->column+1] = true; 
+	if ((from->row - 2 >= 0) && (from->column - 1 >= 0) && ((Chessboard[from->row -2][from->column -1] == EMPTY) || (Chessboard[from->row -2][from->column-1] < 0)))
+	tab[from->row-2][from->column-1] = true;
+}
+
+bool BishopMove(chessboard Chessboard, Square* from, bool tab[SIZE][SIZE])
+{
+	bool first_enemy = true; //Sprawdzamy czy ju¿ jakiœ pionek by³ zbity (nie mo¿emy kilku figur w jednym ruchu)
+	for (int i = 1; ((i + from->row )< SIZE)&&((from->column+i)<SIZE); i++)
+	{
+		if (Chessboard[from->row + i][from->column + i] > 0)//Jeœli na przek¹tnej znajduje siê bia³a figura, to nie mo¿emy stan¹æ na tym polu, nie mo¿emy go tak¿e "przeskoczyæ"
+			break;
+			if(((Chessboard[from->row+i][from->column+i] == EMPTY) || (Chessboard[from->row+i][from->column+i] < 0))&& (first_enemy == true))
+			{
+				if (Chessboard[from->row+i][from->column+i] < 0)//Jeœli na przek¹tnej znajduje siê czarna figura, to mo¿emy j¹ zbiæ i stan¹æ na zajmowanym przez ni¹ polu, ale nie mo¿emy iœæ dalej
+					first_enemy = false;
+				tab[from->row+i][from->column+i] = true;
+			}
+		
+	}
+	first_enemy = true;
+	for (int i = 1; (from->row-i)>=0 && (from->column - i) >= 0; i++)
+	{
+		if (Chessboard[from->row - i][from->column - i] > 0)
+			break;
+		if (((Chessboard[from->row - i][from->column - i] == EMPTY) || (Chessboard[from->row - i][from->column - i] < 0)) && (first_enemy == true))
+		{
+			if (Chessboard[from->row - i][from->column - i] < 0)
+				first_enemy = false;
+			tab[from->row - i][from->column - i] = true;
+		}
+
+	}
+	first_enemy = true;
+	for (int i = 1; (from->row-i) >=0 && (from->column + i) < SIZE; i++)
+	{
+		if (Chessboard[from->row - i][from->column + i] > 0)
+			break;
+		if (((Chessboard[from->row - i][from->column + i] == EMPTY) || (Chessboard[from->row - i][from->column + i] < 0)) && (first_enemy == true))
+		{
+			if (Chessboard[from->row - i][from->column + i] < 0)
+				first_enemy = false;
+			tab[from->row - i][from->column + i] = true;
+		}
+
+	}
+	first_enemy = true;
+	for (int i = 1; ((i + from->row) < SIZE) && ((from->column - i) >= 0); i++)
+	{
+		if (Chessboard[from->row + i][from->column - i] > 0)
+			break;
+		if (((Chessboard[from->row + i][from->column - i] == EMPTY) || (Chessboard[from->row + i][from->column - i] < 0)) && (first_enemy == true))
+		{
+			if (Chessboard[from->row + i][from->column - i] < 0)
+				first_enemy = false;
+			tab[from->row + i][from->column - i] = true;
+		}
+
+	}
+}
+
+bool QueenMove(chessboard Chessboard, Square* from, bool tab[SIZE][SIZE])
+{
+	BishopMove(Chessboard, from, tab);
+	RookMove(Chessboard, from, tab);
+}
+
+bool KingMove(chessboard Chessboard, Square* from, bool tab[SIZE][SIZE])
+{
+	if (from->row + 1 < SIZE)
+	{
+		if (from->column + 1 < SIZE&&((Chessboard[from->row+1][from->column+1]==EMPTY)||(Chessboard[from->row+1][from->column+1]<0)))
+		{
+			tab[from->row+1][from->column + 1] = true;
+		}
+		if (from->column - 1 >= 0 && ((Chessboard[from->row + 1][from->column - 1] == EMPTY) || (Chessboard[from->row + 1][from->column - 1] < 0)))
+		{
+			tab[from->row+1][from->column - 1] = true;
+		}
+		if (Chessboard[from->row + 1][from->column] == EMPTY || Chessboard[from->row + 1][from->column] < 0)
+		{
+			tab[from->row + 1][from->column] = true;
+		}
+	}
+	if (from->row - 1 >= 0)
+	{
+		if (from->column + 1 < SIZE && ((Chessboard[from->row - 1][from->column + 1] == EMPTY) || (Chessboard[from->row - 1][from->column + 1] < 0)))
+		{
+			tab[from->row-1][from->column + 1] = true;
+		}
+		if (from->column - 1 >= 0 && ((Chessboard[from->row - 1][from->column - 1] == EMPTY) || (Chessboard[from->row - 1][from->column - 1] < 0)))
+		{
+			tab[from->row-1][from->column - 1] = true;
+		}
+		if (Chessboard[from->row - 1][from->column] == EMPTY || Chessboard[from->row - 1][from->column] < 0)
+		{
+			tab[from->row - 1][from->column] = true;
+		}
+	}
+	if (from->column + 1 < SIZE && ((Chessboard[from->row][from->column + 1] == EMPTY) || (Chessboard[from->row][from->column + 1] < 0)))
+	{
+		tab[from->row][from->column + 1] = true;
+	}
+	if (from->column - 1 >= 0 && ((Chessboard[from->row][from->column - 1] == EMPTY) || (Chessboard[from->row][from->column - 1] < 0)))
+	{
+		tab[from->row][from->column - 1] = true;
+	}
 	
-	if (BishopMove(new_game, from, to))//Je¿eli ruch nastêpuje po skosie (odpowiada ruchowi goña)
-		return true;
-	if (RookMove(new_game, from, to))//Je¿eli ruch nastêpuje po prostej (odpowiada ruchowi wie¿y)
-		return true;
-	return false;
 }
-
-bool KingMove(Game* new_game, Square *from, Square *to)
-{
-	if ((from->row == to->row) && abs((from->column - to->column) == 1))
-		return true;
-
-}
+	
 
 void Move(Square* from, Square* to, Game* new_game)
 {
@@ -161,141 +285,37 @@ void Move(Square* from, Square* to, Game* new_game)
 	new_game->Chessboard[from->row][from->column] = EMPTY;
 }
 
-void PawnPromotion(Game* new_game, Square* to)
+void PawnPromotion(chessboard Chessboard, Square* to)
 {
-	if (to->row == 7)
+	if (to->row == SIZE - 1)
+		Chessboard[to->row][to->column] = 5;
+}
+
+
+void TurnTheBoardChangeColor(chessboard Chessboard)
+{
+	for (int i = 0; i < SIZE/2; i++)//Zamiana kolorów 
 	{
-		new_game->Chessboard[to->row][to->column] = QUEEN_WHITE;
-		return;
-	} 
-	if (to->row == 0)
-	{
-		new_game->Chessboard[to->row][to->column] = QUEEN_BLACK;
-		return;
+		for (int j = 0; j < SIZE; j++)
+		{
+			int t = Chessboard[i][j];
+			Chessboard[i][j] = (Chessboard[SIZE - 1 - i][SIZE - 1 - j]);
+			Chessboard[SIZE - 1 - i][SIZE - 1 - j] = t;
+		}
 	}
 }
 
-MoveInfo GetMove(Game* new_game, Square* to, Square* from)
+void PrintBoolTab(bool tab[SIZE][SIZE])
 {
-	bool isvalid = false;
-	switch (new_game->Chessboard[from->row][from->column])
+	printf("\n");
+	for (int i = 0; i < SIZE; i++)
 	{
-	case 1:
-	{
-	     isvalid=PawnMove(new_game, from, to);
-	}
-	case 2:
-	{
-		isvalid=RookMove(new_game, from, to);
-	}
-	case 3:
-	{
-		isvalid=KnightMove(new_game, from, to);
-	}
-	case 4:
-	{
-		isvalid=BishopMove(new_game, from, to);
-	}
-	case 5:
-	{
-		isvalid=QueenMove(new_game, from, to);
-	}
-	case 6:
-	{
-		isvalid=KingMove(new_game, from, to);
-	}
-	default:
-		break;
-	}
-	if (isvalid)
-	{
-		//SprawdŸ czy po wykonaniu ruchu mój król jest w szachu, jeœli jest zwróæ informacjê ¿e ruch nie jest prawid³owy.
-		if (false)
-			return INVALID_MOVE_ACTUAL_KING_IS_IN_DANGER;
-		//Wykonaj ruch.
-		if (true)
+		for (int j = 0; j < SIZE; j++)
 		{
-			//SetCheckState(new_game);
-			return VALID_MOVE_OPPONENT_KING_IS_IN_DANGER;
+			printf(" %d ", tab[i][j]);
 		}
-			return VALID_MOVE;
-		//Je¿eli król przeciwnika jest w szachu zmieñ pole struktury gra->czarny_szach na true i zwróæ wiadomoœæ MoveInfo.
-		//Je¿eli nie to zwróæ odpowiednie MoveInfo
-
+		printf("\n");
 	}
-	return INVALID_MOVE;
-	//Ruch by³ nieprawid³owy
-
 }
 
-bool RookMove(Game* new_game, Square *from, Square *to)
-{
-	if (from->row == to->row) //ruch w kierunku poziomym (ten sam wiersz)
-	{
-		if (from->column < to->column)//ruch w prawo
-		{
-			for (int i = 1; i+from->column < to->column; i++)
-			{
-				if (new_game->Chessboard[from->row][from->column + i] != EMPTY)
-					return false;
-			}
-			return true;
-		}
-		else //ruch w lewo
-		{
-			for (int i = 1; i+to->column < from->column; i++)
-			{
-				if (new_game->Chessboard[to->row][to->column + i] != EMPTY)
-					return false;
-			}
-			return true;
-		}
-	}
-	if (from->column == to->column) //ruch w kierunku pionowym (ta sama kolumna)
-	{
-		if (from->row > to->row)//ruch w dó³
-		{
-			for (int i = 1; i+from->row < to->row; i++)
-			{
-				if (new_game->Chessboard[from->row+i][from->column] != EMPTY)
-					return false;
-			}
-			return true;
-		}
-		else //ruch w górê
-		{
-			for (int i = 1; i+to->row < from->row; i++)
-			{
-				if (new_game->Chessboard[to->row+i][to->column] != EMPTY)
-					return false;
-			}
-			return true;
-		}
-	}
-	return false;
-}
-
-bool PawnMove(Game* new_game, Square *from, Square *to)
-{
-	if (new_game->Chessboard[from->row][from->column] == 1)
-	{
-		if ((from->row == 1) && (to->row == 3) && (to->column == from->column) && (new_game->Chessboard[from->row + 1][from->column] == EMPTY))
-			return true; //pierwszy ruch bia³ego pionka na szachownicy (mo¿na przesun¹æ siê dwa pola do przodu)
-		if (from->row == to->row - 1)
-			return true; //przesuniêcie piona w dó³
-		if ((from->row == to->row - 1) && (abs(from->column - to->column) == 1) && new_game->Chessboard[to->row][to->column] < 0)
-			return true; //zbicie po skosie
-	}
-	if (new_game->Chessboard[from->row][from->column] == -1)
-	{
-		if((from->row == 6) && (to->row == 4) && (to->column == from->column)&&(new_game->Chessboard[from->row-1][from->column]==EMPTY))
-			return true; //pierwszy ruch czarnego pionka na szachownicy (mo¿na przesun¹æ siê dwa pola do przodu)
-		if (from->row == to->row + 1)
-			return true; //przesuniêcie piona w górê
-		if ((from->row == to->row + 1) && (abs(from->column - to->column) == 1) && new_game->Chessboard[to->row][to->column] > 0)
-			return true; //zbicie po skosie
-	}
-	return false;
-
-}
 

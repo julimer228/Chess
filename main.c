@@ -5,7 +5,7 @@ int main(int argc, char* argv[])
 {
 	Game* new_game = CreateGame();
 	PrintChessboard(new_game);
-	Square a = { 1,1 };
+	/**Square a = { 1,1 };
 	Square b = { 2,2};
 	if (RookMove(new_game, &a, &b))
 		printf("Ojojo");
@@ -39,6 +39,14 @@ int main(int argc, char* argv[])
 	AddAnElement(&a5, &a5, &pHead);
 	AddAnElement(&a6, &a6, &pHead);
 	PrintOnTheScreen(pHead);
-	RemoveFormMemory(&pHead);
+	RemoveFormMemory(&pHead);*/
+	bool tab[SIZE][SIZE] = { {false} };
+	Square* new_square = CreateNewSquare(3, 5);
+	KingMove(new_game->Chessboard, new_square, tab);
+	PrintBoolTab(tab);
+	TurnTheBoardChangeColor(new_game->Chessboard);
+	PrintChessboard(new_game);
+
+	
 
 }

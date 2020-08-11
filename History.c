@@ -11,6 +11,12 @@ Square* CreateNewSquare(int row, int column)
 	return new_square;
 }
 
+void RemoveSquare(Square** square_t)
+{
+	free(*square_t);
+	square_t = NULL;
+}
+
 bool IsOnTheChessboard(Square* boardsquare)
 {
 	if (boardsquare->column >= 0 && boardsquare->column < 8 && boardsquare->row < 8 && boardsquare->row >= 0)
@@ -47,6 +53,8 @@ void RemoveFormMemory(HistoryElement** pHead)
 	{
 		*pHead = (*pHead)->pNext;
 	//	printf("Deleting %d\n", element_t->from->column); //Pomocnicze wyœwietlanie usuwanych elementów na ekran
+		free((*pHead)->to);
+		free((*pHead)->from);
 		free(element_t);
 		element_t= *pHead;
 	}

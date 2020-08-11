@@ -3,11 +3,13 @@
 #define HISTORY_H
 #include<stdbool.h>
 #include<stdio.h>
+
  /**Struktura reprezentuj¹ca pole na szachownicy*/
 typedef struct square
 {
     int row, column;
 }Square;
+
 /**Struktura u¿yta do zapisu przebiegu rozgrywki. Lista jednokierunkowa.*/
 typedef struct history
 {
@@ -22,10 +24,6 @@ typedef struct history
 @return wskaŸnik na nowo utworzon¹ strukturê, jeœli struktura nie zosta³a poprawnie zaalokowana w pamiêci, wskaŸnik ma wartoœæ NULL
 @waring funkcja alokuje pamiêæ*/
 Square* CreateNewSquare(int row, int column);
-
-/**Funkcja usuwaj¹ca dynamicznie zaalokowan¹ strukturê quare z pamiêci
-@param suare_t*/
-void Remove
 
 /**Funkcja sprawdza czy pole znajduje siê na szachownicy
 @param boardsquare pole które chcemy sprawdziæ
