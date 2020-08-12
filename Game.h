@@ -159,14 +159,31 @@ void PawnPromotion(chessboard Chessboard, Square* to);
 /*Funkcja rozpoznaje jaka figura znajduje się na polu i sprawdza, czy ruch może zostać wykonany.
 @param new_game aktualnie rozgrywana partia
 @param from pole z którego ma zostać wykonany ruch
-@param to pole na które ma zostać przesunięta figura
-@return informacja o ruchu*/
-MoveInfo GetMove(Game* new_game, Square* from, Square* to);
+@param to pole na które ma zostać przesunięta figura*/
+void GetMoves(chessboard Chessboard, bool tab[SIZE][SIZE], Square* from);
 
 /*Funkcja odwracająca Szachownicę o 180 stopni. Zamienia kolor figur na przeciwny. Pozwala używać funkcji napisanych dla białego gracza, także dla czarnego gracza.
-@param Chessboard szachownica z aktualnym ułożeniem figur na planszy*/
+@param Chessboard szachownica z aktualnym ustawieniem figur*/
 void TurnTheBoardChangeColor(chessboard Chessboard);
 
+/*Funkcja odwracająca szachownicę o 180 stopni.
+@param Chessboard szachownica z aktualnym ustawieniem figur*/
+void TurnTheBoard(chessboard Chessboard);
+
+/*Funkcja zwraca pole na którym stoi czarny król
+@param Chessboard
+@return Square* wskaźnik na pole na którym stoi król
+@warning Funkcja alokuje pamięć!*/
+Square* FindTheBlackKing(chessboard Chessboard);
+
+/**Funkcja sprawdza czy czarny król jest w szachu
+@param Chessboard
+@return true jeśli król jest w szachu, false jeśli nie jest*/
+bool IsBlackKingChecked(chessboard Chessboard);
+
+/**Funkcja zmieniająca aktualnego gracza
+@param new_game aktualnie rozgrywana partia*/
+void SwitchPlayers(Game* new_game);
 
 //*FUNKCJE POMOCNICZE UŻYTE DO DEBUGOWANIA PROJEKTU */
 /*Funkcja wypisuje na ekranie zawartość tablicy zawierającej możliwe do wykonania ruchy*/

@@ -292,17 +292,93 @@ void PawnPromotion(chessboard Chessboard, Square* to)
 }
 
 
+void GetMoves(chessboard Chessboard, bool tab[SIZE][SIZE], Square* from)
+{
+	switch (Chessboard[from->row][from->column])
+	{
+	case PAWN_WHITE: PawnMove(Chessboard, from, tab);
+		break;
+	case ROOK_WHITE: RookMove(Chessboard, from, tab);
+		break;
+	case KNIGHT_WHITE: KnightMove(Chessboard, from, tab);
+		break;
+	case BISHOP_WHITE: BishopMove(Chessboard, from, tab);
+		break;
+	case QUEEN_WHITE: QueenMove(Chessboard, from, tab);
+		break;
+	case KING_WHITE: KingMove(Chessboard, from, tab);
+		break;
+	default:
+		break;
+	}
+}
+
 void TurnTheBoardChangeColor(chessboard Chessboard)
 {
 	for (int i = 0; i < SIZE/2; i++)//Zamiana kolorów 
 	{
 		for (int j = 0; j < SIZE; j++)
 		{
-			int t = Chessboard[i][j];
-			Chessboard[i][j] = (Chessboard[SIZE - 1 - i][SIZE - 1 - j]);
+			int t = -Chessboard[i][j];
+			Chessboard[i][j] = -(Chessboard[SIZE - 1 - i][SIZE - 1 - j]);
 			Chessboard[SIZE - 1 - i][SIZE - 1 - j] = t;
 		}
 	}
+}
+
+void TurnTheBoard(chessboard Chessboard)
+{
+	for (int i = 0; i < SIZE / 2; i++)//Zamiana kolorów 
+	{
+		for (int j = 0; j < SIZE; j++)
+		{
+			int t = Chessboard[i][j];
+			Chessboard[i][j] =(Chessboard[SIZE - 1 - i][SIZE - 1 - j]);
+			Chessboard[SIZE - 1 - i][SIZE - 1 - j] = t;
+		}
+	}
+}
+
+Square* FindTheBlackKing(chessboard Chessboard)
+{
+	for (int i = 0; i < SIZE; i++)
+	{
+		for (int j = 0; j < SIZE; j++)
+		{
+			if (Chessboard[i][j] == KING_BLACK)
+				return CreateNewSquare(i, j);
+		}
+	}
+	return NULL;
+}
+
+
+bool IsBlackKingChecked(chessboard Chessboard)
+{
+	bool blackcheck = false;
+	bool tab[SIZE][SIZE] = { {false} };
+	Square *BlackKingPosition = FindTheBlackKing(Chessboard);
+	for (int i = 0; i < SIZE; i++)
+	{
+		for (int j = 0; j < SIZE; j++)
+		{
+			Square* square_t = CreateNewSquare(i, j);
+			GetMoves(Chessboard, tab, square_t);
+			free(square_t);
+		}
+	}
+	if (tab[BlackKingPosition->row][BlackKingPosition->column])
+		blackcheck = true;
+	
+	free(BlackKingPosition);
+	return blackcheck;
+}
+
+void SwitchPlayers(Game* new_game)
+{
+	if (new_game->CurrentPlayer == white)
+		new_game->CurrentPlayer = black;
+	else new_game->CurrentPlayer = white;
 }
 
 void PrintBoolTab(bool tab[SIZE][SIZE])
