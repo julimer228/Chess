@@ -381,6 +381,13 @@ void SwitchPlayers(Game* new_game)
 	else new_game->CurrentPlayer = white;
 }
 
+bool BelongsToCurrentPlayer(Player currentplayer, chessboard Chessboard, Square *square_)
+{
+	if (Chessboard[square_->row][square_->column] > 0)
+		return true;
+	return false;
+}
+
 void PrintBoolTab(bool tab[SIZE][SIZE])
 {
 	printf("\n");

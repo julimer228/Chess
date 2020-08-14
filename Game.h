@@ -185,6 +185,14 @@ bool IsBlackKingChecked(chessboard Chessboard);
 @param new_game aktualnie rozgrywana partia*/
 void SwitchPlayers(Game* new_game);
 
+/**Funkcja sprawdza czy bierka należy do aktualnego gracza
+@param currentplayer aktualny gracz
+@param Chessboard szachownica z aktualnym ułożeniem figur
+@param square_ pole na którym stoi figura
+@return true, jeśli figura należy do aktualnego gracza, w przeciwnym wypadku false*/
+bool BelongsToCurrentPlayer(Player currentplayer, chessboard Chessboard, Square* square_);
+
+
 //*FUNKCJE POMOCNICZE UŻYTE DO DEBUGOWANIA PROJEKTU */
 /*Funkcja wypisuje na ekranie zawartość tablicy zawierającej możliwe do wykonania ruchy*/
 void PrintBoolTab(bool tab[SIZE][SIZE]);
