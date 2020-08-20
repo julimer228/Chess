@@ -22,7 +22,7 @@ void InitializeTheChessboard(chessboard Chessboard)
 	Chessboard[0][3] = QUEEN_WHITE;
 	Chessboard[0][4] = KING_WHITE;
 	Chessboard[0][5] = BISHOP_WHITE;
-	Chessboard[0][6] = KING_WHITE;
+	Chessboard[0][6] = KNIGHT_WHITE;
 	Chessboard[0][7] = ROOK_WHITE;
 
 	//pozosta³e czarne figury
@@ -43,6 +43,7 @@ Game* CreateGame()
 		return NULL;
 	new_game->BlackCheck = false;
 	new_game->WhiteCheck = false;
+	new_game->HasGameEnded = false;
 	new_game->CurrentPlayer = white;
 	InitializeTheChessboard(new_game->Chessboard); /*Ustawienie pocz¹tkowe na szachownicy*/
 	return new_game;
@@ -68,6 +69,7 @@ void PrintChessboard(Game* new_game)
 		printf("|\n");
 		printf("---------------------------------\n");
 	}
+	printf("%d", new_game->Chessboard[1][7]);
 }
 
 bool IsEmpty(Square* to, Game* new_game)
@@ -101,7 +103,7 @@ void PawnMove(chessboard Chessboard, Square* from, bool tab[SIZE][SIZE])
 		tab[from->row + 1][from->column - 1] = true;
 }
 
-bool RookMove(chessboard Chessboard, Square* from, bool tab[SIZE][SIZE])
+void RookMove(chessboard Chessboard, Square* from, bool tab[SIZE][SIZE])
 {
 	for (int i = 1; from->row + i < SIZE; i++)
 	{
@@ -173,7 +175,7 @@ void KnightMove(chessboard Chessboard, Square* from, bool tab[SIZE][SIZE])
 	tab[from->row-2][from->column-1] = true;
 }
 
-bool BishopMove(chessboard Chessboard, Square* from, bool tab[SIZE][SIZE])
+void BishopMove(chessboard Chessboard, Square* from, bool tab[SIZE][SIZE])
 {
 	bool first_enemy = true; //Sprawdzamy czy ju¿ jakiœ pionek by³ zbity (nie mo¿emy kilku figur w jednym ruchu)
 	for (int i = 1; ((i + from->row )< SIZE)&&((from->column+i)<SIZE); i++)
@@ -229,13 +231,13 @@ bool BishopMove(chessboard Chessboard, Square* from, bool tab[SIZE][SIZE])
 	}
 }
 
-bool QueenMove(chessboard Chessboard, Square* from, bool tab[SIZE][SIZE])
+void QueenMove(chessboard Chessboard, Square* from, bool tab[SIZE][SIZE])
 {
 	BishopMove(Chessboard, from, tab);
 	RookMove(Chessboard, from, tab);
 }
 
-bool KingMove(chessboard Chessboard, Square* from, bool tab[SIZE][SIZE])
+void KingMove(chessboard Chessboard, Square* from, bool tab[SIZE][SIZE])
 {
 	if (from->row + 1 < SIZE)
 	{
@@ -288,11 +290,11 @@ void Move(Square* from, Square* to, Game* new_game)
 void PawnPromotion(chessboard Chessboard, Square* to)
 {
 	if (to->row == SIZE - 1)
-		Chessboard[to->row][to->column] = 5;
+		Chessboard[to->row][to->column] = 5; //zamieñ bia³ego pionka na hetmana
 }
 
 
-void GetMoves(chessboard Chessboard, bool tab[SIZE][SIZE], Square* from)
+void GetMove(chessboard Chessboard, bool tab[SIZE][SIZE], Square* from)
 {
 	switch (Chessboard[from->row][from->column])
 	{
@@ -310,6 +312,22 @@ void GetMoves(chessboard Chessboard, bool tab[SIZE][SIZE], Square* from)
 		break;
 	default:
 		break;
+	}
+}
+
+void GetAllMoves(chessboard Chessboard, bool tab[SIZE][SIZE])
+{
+	for (int i = 0; i < SIZE; i++)
+	{
+		for (int j = 0; j < SIZE; j++)
+		{
+			if (Chessboard[i][j] > 0)
+			{
+				Square* square_t=CreateNewSquare(i, j);
+				GetMove(Chessboard, tab, square_t);
+				free(square_t);
+			}
+		}
 	}
 }
 
@@ -358,18 +376,9 @@ bool IsBlackKingChecked(chessboard Chessboard)
 	bool blackcheck = false;
 	bool tab[SIZE][SIZE] = { {false} };
 	Square *BlackKingPosition = FindTheBlackKing(Chessboard);
-	for (int i = 0; i < SIZE; i++)
-	{
-		for (int j = 0; j < SIZE; j++)
-		{
-			Square* square_t = CreateNewSquare(i, j);
-			GetMoves(Chessboard, tab, square_t);
-			free(square_t);
-		}
-	}
-	if (tab[BlackKingPosition->row][BlackKingPosition->column])
+	GetAllMoves(Chessboard, tab);//Zapisujemy w tablicy wszystkie mo¿liwe ruchy bia³ego gracza
+	if (tab[BlackKingPosition->row][BlackKingPosition->column])//Jeœli pole na którym stoi król jest polem atakowanym przez bia³¹ bierkê oznacza to ¿e czarny król jest w szachu
 		blackcheck = true;
-	
 	free(BlackKingPosition);
 	return blackcheck;
 }

@@ -1,7 +1,6 @@
 ﻿/**@FILE*/
 #ifndef GAME_H
 #define GAME_H
-//#include "History.h"
 #include<stdbool.h>
 #include<stdio.h>
 #include "History.h"
@@ -38,20 +37,6 @@ typedef enum players_t
 /**Szachownica*/
 typedef int chessboard[SIZE][SIZE];
 
-/**Typy pól na szachownicy ze względu na możliwość wykonania ruchu*/
-typedef enum squaretype
-{
-    valid, //pole dozwolone
-    invalid, //pole niedozwolone
-    killed, //pole dozwolone, nastąpi zbicie figury przeciwnika
-    threatened, //pole niedozwolone, król aktualnego gracza będzie w szachu
-    killed_and_threatened,//pole niedozwolone, możliwe zbicie, jednak król aktualnego gracza będzie w szachu
-    opponent_king_threatened,//pole dozwolone, król przeciwnika jest w szachu
-}SquareType;
-
-/**Szachownica zawierająca pola w raz z typami możliwych ruchów do wykonania*/
-typedef SquareType BoardWithTypes[SIZE][SIZE];
-
 /**Struktura reprezentująca grę*/
 typedef struct game
 {
@@ -59,20 +44,12 @@ typedef struct game
     chessboard Chessboard; //szachownica
     bool WhiteCheck; //czy biały król jest w szachu
     bool BlackCheck; // czy czarny król jest w szachu
+    bool HasGameEnded;//zawiera informację, czy gra została zakończona
     HistoryElement* pHead; //wskaźnik na początek listy jednokierunkowej do której zapisywany jest przebieg rozgrywki
-    BoardWithTypes ChessboardWithTypes;//Szachownica zawierająca pola z typami ruchów
+    char file_name[50];//nazwa pliku do którego zostanie zapisany przebieg partii, po zakończeniu gry
 }Game;
 
-/**Typ zawierający błędy jakie mogą wystąpić podczas rozgrywki*/
-typedef enum moveinfo
-{
-    INVALID_MOVE, //ruch jest poprawny
-    VALID_MOVE, //ruch jest niepoprawny
-    INVALID_MOVE_ACTUAL_KING_IS_IN_DANGER, //ruch jest niepoprawny, król aktualnego gracza byłby w szachu
-    VALID_MOVE_OPPONENT_KING_IS_IN_DANGER //ruch
-}MoveInfo;
-
-/**PROTOTYPY FUNKCJI/
+/*-------------------------PROTOTYPY FUNKCJI--------------------------------*/
 
 /**Funkcja zapisuje ustawienie początkowe figur na szachownicy
 @param Chessboard szachownica na której będą rozkładane figury
@@ -103,46 +80,52 @@ bool IsEmpty(Square* to, Game* new_game);
 @return true, jeśli pole jest zajęte przez figurę przeciwnika, w przeciwnym wypadku false*/
 bool IsEnemy(Square* to, Square* from, Game* new_game);
 
+/*--------------FUNKCJE ODPOWIEDZIALNE ZA RUCHY FIGUR------------------------*/
+/* Funkcje działają dla figur białego gracza, aby zastosować je dla czarnego */ 
+/* gracza należy odwrócić planszę, oraz zamienić kolory figur                */
+/*---------------------------------------------------------------------------*/
+
 /**Funkcja po podaniu pola startowego, z którego ma ruszyć pionek zaznacza, które pola są dozwolone.
 @param Chessboard szachownica zawierająca aktualne ustawienie figur na planszy
 @param from pole z którego ma natąpić ruch
-@param ValidMovesBoard tablica dwuwymiarowa zawierająca informację, na które pola można przesunąć pionek*/
+@param tab tablica dwuwymiarowa zawierająca informację, na które pola można przesunąć piona*/
 void PawnMove(chessboard Chessboard, Square *from, bool tab[SIZE][SIZE]);
 
-/**Funkcja sprawdzająca czy ruch skoczka jest poprawny
-@param new_geme aktualnie rozgrywana partia
-@param from pole z którego ma natąpić ruch
-@param to pole na które figura ma zostać przesunięta
-@return true jeśli ruch jest możliwy do wykonania, false jeśli ruch nie jest możliwy*/
-bool RookMove(chessboard Chessboard, Square*from, bool tab[SIZE][SIZE]);
-
 /**Funkcja sprawdzająca czy ruch wieży jest poprawny
-@param new_geme aktualnie rozgrywana partia
+@param Chessboard aktualnie rozgrywana partia
 @param from pole z którego ma natąpić ruch
-@param to pole na które figura ma zostać przesunięta
-@return true jeśli ruch jest możliwy do wykonania, false jeśli ruch nie jest możliwy*/
+@param tab tablica dwuwymiarowa zawierająca informację, na które pola można przesunąć wieżę*/
+void RookMove(chessboard Chessboard, Square*from, bool tab[SIZE][SIZE]);
+
+/**Funkcja sprawdzająca czy ruch skoczka jest poprawny
+@param Chessboard aktualnie rozgrywana partia
+@param from pole z którego ma natąpić ruch
+@param tab tablica dwuwymiarowa zawierająca informację, na które pola można przesunąć skoczka*/
 void KnightMove(chessboard Chessboard, Square *from, bool tab[SIZE][SIZE]);
 
 /**Funkcja odpowiadająca za ruch gońca
-@param new_geme aktualnie rozgrywana partia
+@param Chessboard aktualnie rozgrywana partia
 @param from pole z którego ma natąpić ruch
-@param to pole na które figura ma zostać przesunięta
-@return true jeśli ruch jest możliwy do wykonania, false jeśli ruch nie jest możliwy*/
-bool BishopMove(chessboard Chessboard, Square*from, bool tab[SIZE][SIZE]);
+@param tab tablica dwuwymiarowa zawierająca informację, na które pola można przesunąć gońca*/
+void BishopMove(chessboard Chessboard, Square*from, bool tab[SIZE][SIZE]);
 
 /**Funkcja sprawdzająca czy ruch hetmana jest poprawny
-@param new_geme aktualnie rozgrywana partia
+@param Chessboard aktualnie rozgrywana partia
 @param from pole z którego ma natąpić ruch
-@param to pole na które figura ma zostać przesunięta
-@return true jeśli ruch jest możliwy do wykonania, false jeśli ruch nie jest możliwy*/
-bool QueenMove(chessboard Chessboard, Square *from, bool tab[SIZE][SIZE]);
+@param tab tablica dwuwymiarowa zawierająca informację, na które pola można przesunąć hetmana*/
+void QueenMove(chessboard Chessboard, Square *from, bool tab[SIZE][SIZE]);
 
 /**Funkcja sprawdzająca czy ruch króla jest poprawny
-@param new_geme aktualnie rozgrywana partia
+@param Chessboard aktualnie rozgrywana partia
 @param from pole z którego ma natąpić ruch
-@param to pole na które figura ma zostać przesunięta
-@return true jeśli ruch jest możliwy do wykonania, false jeśli ruch nie jest możliwy*/
-bool KingMove(chessboard Chessboard, Square *from, bool tab[SIZE][SIZE]);
+@param tab tablica dwuwymiarowa zawierająca informację, na które pola można przesunąć króla*/
+void KingMove(chessboard Chessboard, Square *from, bool tab[SIZE][SIZE]);
+
+/**Funkcja odpowiadająca za promocję piona, jeśli pion znajduje się w pierwszym lub ostatnim wierszu
+szachownicy, zostaje zamieniony w hetmana. W przeciwnym wypadku funkcja nie robi nic.
+@param Chessboard szachownica
+@param to pole na które został przesunięty pionek*/
+void PawnPromotion(chessboard Chessboard, Square* to);
 
 /**Funkcja przesuwająca figurę
 @param from pole z którego następuje ruch
@@ -150,17 +133,16 @@ bool KingMove(chessboard Chessboard, Square *from, bool tab[SIZE][SIZE]);
 @param new_game aktualnie rozgrywana partia*/
 void Move(Square* from, Square* to, Game* new_game);
 
-/**Funkcja odpowiadająca za promocję piona, jeśli pion znajduje się w pierwszym lub ostatnim wierszu
-szachownicy, zostaje zamieniony w hetmana. W przeciwnym wypadku funkcja nie robi nic.
-@param new_game aktualnie rozgrywana gra
-@param to pole na które został przesunięty pionek*/
-void PawnPromotion(chessboard Chessboard, Square* to);
-
-/*Funkcja rozpoznaje jaka figura znajduje się na polu i sprawdza, czy ruch może zostać wykonany.
-@param new_game aktualnie rozgrywana partia
+/*Funkcja rozpoznaje jaka figura znajduje się na polu określa na jakie pola figura może zostać przesunięta.
+@param Chessboard szachownica
 @param from pole z którego ma zostać wykonany ruch
-@param to pole na które ma zostać przesunięta figura*/
-void GetMoves(chessboard Chessboard, bool tab[SIZE][SIZE], Square* from);
+@param tab tablica dwuwymiarowa zawierająca dozwolone i niedozwolone pola*/
+void GetMove(chessboard Chessboard, bool tab[SIZE][SIZE], Square* from);
+
+/*Funkcja zaznacza w tablicy tab wszystkie możliwe ruchy białego gracza*
+@param Chessboard szachownica 
+@param tab tablica dwuwymiarowa zawierająca dozwolone i niedozwolone pola*/
+void GetAllMoves(chessboard Chessboard, bool tab[SIZE][SIZE]);
 
 /*Funkcja odwracająca Szachownicę o 180 stopni. Zamienia kolor figur na przeciwny. Pozwala używać funkcji napisanych dla białego gracza, także dla czarnego gracza.
 @param Chessboard szachownica z aktualnym ustawieniem figur*/
@@ -181,6 +163,7 @@ Square* FindTheBlackKing(chessboard Chessboard);
 @return true jeśli król jest w szachu, false jeśli nie jest*/
 bool IsBlackKingChecked(chessboard Chessboard);
 
+
 /**Funkcja zmieniająca aktualnego gracza
 @param new_game aktualnie rozgrywana partia*/
 void SwitchPlayers(Game* new_game);
@@ -193,7 +176,7 @@ void SwitchPlayers(Game* new_game);
 bool BelongsToCurrentPlayer(Player currentplayer, chessboard Chessboard, Square* square_);
 
 
-//*FUNKCJE POMOCNICZE UŻYTE DO DEBUGOWANIA PROJEKTU */
+/*-----------FUNKCJE POMOCNICZE UŻYTE DO DEBUGOWANIA PROJEKTU------------------------- */
 /*Funkcja wypisuje na ekranie zawartość tablicy zawierającej możliwe do wykonania ruchy*/
 void PrintBoolTab(bool tab[SIZE][SIZE]);
 
