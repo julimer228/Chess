@@ -38,12 +38,6 @@ bool IsOnTheChessboard(Square* boardsquare);
 @warning Funkcja alokuje pamiêæ!*/
 bool AddAnElement(Square **from, Square **to, HistoryElement** pHead);
 
-/**Saves the game history to the file
-@param pHead wskaŸnik na pocz¹tek listy jednokierunkowej
-@param FileName nazwa pliku do którego ma zostaæ zapisany przebieg rozgrywki
-@return true je¿eli historia rozgrywki zosta³a zapisana poprawnie w przeciwnym wypadku false*/
-bool SaveToFile();
-
 /**Pomocnicza funkcja wypisuj¹ca elementy listy na ekranie (od pierwszego elementu).
 @param pHead wskaŸnik na pocz¹tek listy jednokierunkowej*/
 void PrintOnTheScreen (HistoryElement *pHead);

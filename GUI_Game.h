@@ -22,11 +22,6 @@ typedef struct gui_game
 	GUI_State gui_game_state_actual;
 }GUI_Game;
 
-typedef GUI_State GUI_State_func_t(GUI_Game * GUI_game);
-
-GUI_State_func_t* const GUI_state_tab[] = {
-	do_GUI_STATE_INITIAL, do_GUI_STATE_PLAY, do_GUI_STATE_HELP, do_GUI_STATE_SAVE, do_GUI_STATE_EXIT
-};
 
 /*Funkcja tworzy strukturê gry
 @return utworzona struktura, jeœli nie uda³o siê utworzyæ struktury funkcja zwraca NULL*/
@@ -63,14 +58,17 @@ GUI_State do_GUI_STATE_SAVE(GUI_Game* GUI_game);
 @return kolejny stan gry*/
 GUI_State do_GUI_STATE_EXIT(GUI_Game* GUI_game);
 
-/*Funkcja odpowiedzialna za przechodzenie do kolejnych stanów
+typedef GUI_State GUI_State_func_t(GUI_Game* GUI_game);
+GUI_State_func_t* const GUI_state_tab[] = {
+	do_GUI_STATE_INITIAL, do_GUI_STATE_PLAY, do_GUI_STATE_HELP, do_GUI_STATE_SAVE, do_GUI_STATE_EXIT
+};
+
+/*Funkcja odpowiedzialna za przechodzenie do kolejnych stanów (g³ówna funkcja maszyny stanów)
 @param GUI_state_current aktualny stan gry
 @param GUI_game struktura gry
 @return kolejny stan gry*/
-GUI_State Run_GUI_State(GUI_State GUI_state_current, GUI_Game* GUI_game)
-{
-	return GUI_state_tab[GUI_state_current](GUI_game);
-};
+GUI_State Run_GUI_State(GUI_State GUI_state_current, GUI_Game* GUI_game);
+
 
 
 

@@ -28,7 +28,7 @@ typedef enum gui_user_event
 }GUI_User_Event;
 
 /**Funkcja rozpoczynaj¹ca pracê z bibliotek¹ SDL2*/
-void InitializeSDL2();
+bool InitializeSDL2();
 
 /**Funkcja koñcz¹ca pracê z bibliotek¹ SDL2*/
 void QuitSDL2();
