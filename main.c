@@ -1,15 +1,10 @@
 #include <stdio.h>
-#include "History.h"
-#include "Game.h"
-
-int main()
+#include "GUI_MenuWindow.h"
+int main(int argc, char* argv[])
 {
-    putchar('l');
-    Game* new_game = CreateGame();
-    PrintChessboard(new_game);
-    bool tab[8][8] = { {0} };
-    GetAllMoves(new_game->Chessboard, tab);
-    PrintBoolTab(tab);
-    PrintChessboard(new_game);
-        return 0;
+	SDL_Window* sdl_window=SDL_CreateWindow("Chess",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED, 1000, 700, SDL_WINDOW_SHOWN);
+	SDL_Renderer* new_renderer=SDL_CreateRenderer(sdl_window,-1, NULL);
+	GUI_Window* new_menuwindow = GUI_MenuWindowCreate(sdl_window, new_renderer);
+	GUI_MenuWindowDraw(new_menuwindow);
+	SDL_Delay(3000);
 }
