@@ -38,7 +38,7 @@ typedef enum players_t
 typedef int chessboard[SIZE][SIZE];
 
 /**Struktura reprezentująca grę*/
-typedef struct game
+typedef struct game_t
 {
     Player CurrentPlayer; //aktualny gracz
     chessboard Chessboard; //szachownica
@@ -49,6 +49,16 @@ typedef struct game
     char file_name[50];//nazwa pliku do którego zostanie zapisany przebieg partii, po zakończeniu gry
 }Game;
 
+typedef enum moveinformation
+{
+    INVALID_SQUARE,
+    INVALID_PIECE,
+    INVALID_MOVE,
+    KING_IN_DANGER,
+    KING_STILL_IN_DANGER,
+    VALID_KING_DANGER,
+    VALID_MOVE
+}MoveInformation;
 /*-------------------------PROTOTYPY FUNKCJI--------------------------------*/
 
 /**Funkcja zapisuje ustawienie początkowe figur na szachownicy
