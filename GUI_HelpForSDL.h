@@ -13,9 +13,9 @@
 #define BUTTON_H 72
 #define BUTTON_W 343
 
-/*Wymiary ma³ych przycisków*/
-#define BUTTON_SMALL_H 54
-#define BUTTON_SMALL_W 226
+/*Wymiary przycisku powrotu do menu g³ównego*/
+#define BUTTON_BACK_H 54
+#define BUTTON_BACK_W 226
 
 /*---WYMAGA DOPRACOWANIA!!!---*/
 /**Typ wyliczeniowy okreœlaj¹cy zdarzenia jakie mog¹ mieæ miejsce ze strony u¿ytkownika*/
@@ -24,7 +24,7 @@ typedef enum gui_user_event
 	USER_EVENT_PLAY, //Naciœniêcie przycisku play
 	USER_EVENT_HELP, //Naciœniêcie przycisku help
 	USER_EVENT_EXIT, //Naciœniêcie przycisku exit
-	USER_EVENT_BACK, //Naciœniêcie przycisku back
+	USER_EVENT_BACK_TO_MENU_WINDOW, //Naciœniêcie przycisku back
 	USER_EVENT_OK	//Naciœniêcie przycisku ok
 }GUI_UserEvent;
 

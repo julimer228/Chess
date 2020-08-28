@@ -122,8 +122,9 @@ static void GUI_MouseButtonLeftClickSquare(GUI_Chessboard* guichessboard, int i,
 				guichessboard->from->row=i;
 				guichessboard->from->column=j;
 		}
-		else if (guichessboard->from != -1)
+		else if (guichessboard->from->column != -1&&guichessboard->from->row!=-1)
 		{
+			Square* to=CreateNewSquare(i, j);
 			switch (true)//tutaj funkcja która sprawdza ruch
 			{
 				//Tutaj bêdzie zwracana wiadomoœæ ze struktury game
@@ -150,11 +151,30 @@ static void GUI_MouseButtonLeftClickSquare(GUI_Chessboard* guichessboard, int i,
 			default:
 				break;
 			}
-			//Dodaj poprawny ruch do historii
+
+			//Sprawdziæ czy nie ma wycieków!!!
+			AddAnElement(&guichessboard->from, &to, &guichessboard->game->pHead);
+			
 		}
 
 
 	}
+}
+/*Funkcja zwracaj¹ca wybrany kwadrat szachownicy
+@param i numer wiersza
+@param j numer kolumny
+@return pole znajduj¹ce siê w i-tym wierszu i j-otej kolumnie*/
+static SDL_Rect GUI_ChessboardGetSquare(int i, int j)
+{
+	SDL_Rect getSquare;
+	//Do wspó³rzêdnej startowej dodajemy szerokoœæ kwadratu przemno¿on¹ razy iloœæ kolumn (Otrzymujemy wspó³rzêdn¹ x lewego górnego rogu kwadratu)
+	getSquare.x = START_X + j * GUI_SQUARE;
+	//Obliczenie wspó³rzêdnej y
+	getSquare.y = START_Y + (SIZE - 1 - i) * GUI_SQUARE;
+	//Przypisujemy odpowiedni¹ szerokoœæ i wysokoœæ
+	getSquare.h = GUI_SQUARE;
+	getSquare.w = GUI_SQUARE;
+	return getSquare;
 }
 
 void GUI_handleChessboardEvent(GUI_Widget* widget, SDL_Event* event)
@@ -189,29 +209,12 @@ void GUI_handleChessboardEvent(GUI_Widget* widget, SDL_Event* event)
 					{
 						//Je¿eli zosta³o klikniête lewym przyciskiem myszy 
 						if (event->button.button == SDL_BUTTON_LEFT)
-							GUI_MouseButtonLeftClickSquare();
+							//GUI_MouseButtonLeftClickSquare();
 					}
 				}
 			}
 		}
 	}
-}
-
-/*Funkcja zwracaj¹ca wybrany kwadrat szachownicy
-@param i numer wiersza
-@param j numer kolumny
-@return pole znajduj¹ce siê w i-tym wierszu i j-otej kolumnie*/
-static SDL_Rect GUI_ChessboardGetSquare(int i, int j)
-{
-	SDL_Rect getSquare;
-	//Do wspó³rzêdnej startowej dodajemy szerokoœæ kwadratu przemno¿on¹ razy iloœæ kolumn (Otrzymujemy wspó³rzêdn¹ x lewego górnego rogu kwadratu)
-	getSquare.x = START_X + j * GUI_SQUARE;
-	//Obliczenie wspó³rzêdnej y
-	getSquare.y = START_Y + (SIZE - 1 - i) * GUI_SQUARE;
-	//Przypisujemy odpowiedni¹ szerokoœæ i wysokoœæ
-	getSquare.h = GUI_SQUARE;
-	getSquare.w = GUI_SQUARE;
-	return getSquare;
 }
 
 /*Funkcja rysuj¹ca pust¹ szachownicê
@@ -220,8 +223,8 @@ static SDL_Rect GUI_ChessboardGetSquare(int i, int j)
 static void GUI_DrawEmptyChessboard(GUI_Chessboard* guichessboard, SDL_Renderer* renderer)
 {
 	// Na pocz¹tku malujemy du¿y jednokolorowy kwadrat
-	SDL_SetRenderDrawColor(renderer, 238, 238, 210, 0);
-	SDL_RenderFillRect(renderer, &(guichessboard->location));
+	SDL_SetRenderDrawColor(guichessboard->renderer, 238, 238, 210, 0);
+	SDL_RenderFillRect(guichessboard->renderer, &(guichessboard->location));
 
 	//Zmieniamy kolor
 	SDL_SetRenderDrawColor(renderer, 118, 150, 86, 0);

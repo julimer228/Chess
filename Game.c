@@ -49,9 +49,9 @@ Game* CreateGame()
 	return new_game;
 }
 
-void DestroyGame(Game* new_game)
+void DestroyGame(Game** new_game)
 {
-	if (new_game == NULL)
+	if ((*new_game) == NULL)
 		return;
 	free(new_game);
 }

@@ -27,8 +27,8 @@ bool GUI_MenuWindowButtons(GUI_MenuWindow* menu)
 	// create
 	menu->widgettab[0] = GUI_CreateButton(menu->renderer, "./Graphics/play_button.bmp", Play, GUI_MenuWindowPlay);
 	//Wymaga narysowania nowego przycisku z napisem [HELP]
-	menu->widgettab[1] = GUI_CreateButton(menu->renderer, "./Graphics/play_button.bmp", Help, GUI_MenuWindowHelp);
-	menu->widgettab[2] = GUI_CreateButton(menu->renderer, "./Graphics/play_button.bmp", Exit, GUI_MenuWindowExit);
+	menu->widgettab[1] = GUI_CreateButton(menu->renderer, "./Graphics/help_button.bmp", Help, GUI_MenuWindowHelp);
+	menu->widgettab[2] = GUI_CreateButton(menu->renderer, "./Graphics/exit_button.bmp", Exit, GUI_MenuWindowExit);
 
 	// sprawdzamy, czy przyciski zosta³y poprawnie utworzone
 	for (int i = 0; i <3; i++)
