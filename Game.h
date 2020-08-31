@@ -47,6 +47,7 @@ typedef struct game_t
     bool BlackCheck; // czy czarny król jest w szachu
     bool HasGameEnded;//zawiera informację, czy gra została zakończona
     HistoryElement* pHead; //wskaźnik na początek listy jednokierunkowej do której zapisywany jest przebieg rozgrywki
+    bool IsSaved;//informacja o tym czy gra została poprawnie zapisana
     char file_name[50];//nazwa pliku do którego zostanie zapisany przebieg partii, po zakończeniu gry
 }Game;
 /**Rodzaje możliwych ruchów na szachownicy*/
@@ -72,11 +73,16 @@ typedef enum message_t {
     MS_INVALID_SQUARE,//Niepoprawne pole
     MS_INVALID_PIECE,//Niepoprawna figura
     MS_GAME_ERROR,//Struktura reprezentująca grę nie istnieje lub została niepoprawnie zaalokowana
-    GAME_UNDO_NO_HISTORY,
-    GAME_UNDO_SUCCESS,
     MS_GAME_SUCCESS//sukces
 } Message;
 
+/**Informacja o tym czy gra została zakończona*/
+typedef enum endofgame_t
+{
+    CONTINIUE,
+    OPPONENT_PLAYER_WINNER,
+    DRAW
+}EndOfGame_MS;
 
 /*-------------------------PROTOTYPY FUNKCJI--------------------------------*/
 /**Funkcja tworząca nową grę
@@ -145,7 +151,27 @@ bool IsAValidMove(MoveTab moveType);
 @param from pole z którego ma zostać wykonany ruch
 @param to pole na które ma zostać wykonany ruch
 @return wiadomość o błędzie lub o rodzaju wykonanego ruchu*/
-Message SetMove(Game* game, Square* from, Square* to);
+Message SetMove(Game* game, Square from, Square to);
+
+/**Funkcja sprawdza czy nastąpił koniec gry i zwraca odpowiednią informację
+@param game aktualnie rozgrywana partia
+@return informacja czy gra została zakończona wygraną jednego z graczy*/
+EndOfGame_MS IsTheEndOfGame(Game* game);
+
+/**Funkcja wypełnia tablicę typami dozwolonych ruchów, sprawdza czy została wybrana figura odpowiedniego koloru, 
+oraz czy pole startowe znajduje się na szachownicy
+@param game aktualnie rozgrywana partia
+@param from sprawdzane pole
+@param Move_tab tablica rodzajów ruchów
+@return informacja o tym czy udało się wypełnić tablicę, jeśli nie udało się wypełnić tablicy zwraca informację
+o tym czy została wybrana figura właściwgo koloru lub czy pole znajdowało się na szachownicy*/
+Message SetMoveHelper(Game* game, Square from, movetab Move_tab);
+
+/**Funkcja zapisuje przebieg gry do pliku tekstowego
+@param game aktualnie rozgrywana partia
+@param file_name nazwa pliku do którego zostanie zapisany przebieg gry
+@return true jeśli gra została zapisana poprawnie false jeśli nie udało się poprawne zapisać gry*/
+bool SaveHistoryToFile(Game* game, char* file_name);
 #endif
 
  

@@ -46,6 +46,7 @@ Game* CreateGame()
 	new_game->BlackCheck = false;
 	new_game->WhiteCheck = false;
 	new_game->HasGameEnded = false;
+	new_game->IsSaved = false;
 	new_game->CurrentPlayer = white;
 	InitializeTheChessboard(new_game->Chessboard); /*Ustawienie pocz¹tkowe na szachownicy*/
 	return new_game;
@@ -448,7 +449,7 @@ static void PrepareForNextPlayerTurn(Game* game)
 }
 
 /*Funkcja sprawdza czy figura stoj¹ca na polu sq jest zagro¿ona zbiciem przez figurê przciwnika
-@param Chessboar szachownica
+@param Chessboard szachownica
 @param sq pole na którym stoi figura
 @return true, jeœli figura jest zagro¿ona false jeœli nie jest zagro¿ona*/
 static bool IsPieceInDanger(chessboard Chessboard, Square sq)
@@ -637,20 +638,6 @@ bool IsAValidMove(MoveTab moveType)
 		
 }
 
-Message SetMove(Game* game, Square from, Square to)
-{
-	movetab Move_tab = { {MOVE_IS_INVALID} };//Pocz¹tkowa wartoœæ tablicy zawieraj¹cej rodzaje ruchów
-	MoveTab move;
-	if (game == NULL)
-		return MS_GAME_ERROR;
-	if (IsSquareOnTheChessboard(from) == false || IsSquareOnTheChessboard(to) == false)
-		return MS_INVALID_SQUARE;
-	if (BelongsToActualPlayer(game, from)==false)
-		return MS_INVALID_PIECE;
-
-
-}
-
 /*Funkcja pomocnicza, wype³nia tablicê ruchów, nie potrzebuje tablicy dozwolonych ruchów jako argumentu
 @param game aktualnie rozgrywana partia
 @param Move_Tab tablica z rodzajami ruchów
@@ -660,6 +647,45 @@ static void FillTheMoveTabHelper(Game* game, movetab Move_tab, Square sq)
 	bool tab[SIZE][SIZE] = { {false} };//Tablica dozwolonych ruchów
 	GetValidMoves(game->Chessboard, tab, sq);//Wype³nij tablicê dozwolonych ruchów
 	FillTheMoveTab(game, tab, sq, Move_tab);//Wype³nij tablicê rodzajami ruchów
+}
+
+Message SetMove(Game* game, Square from, Square to)
+{
+	movetab Move_tab = { {MOVE_IS_INVALID} };//Pocz¹tkowa wartoœæ tablicy zawieraj¹cej rodzaje ruchów
+	MoveTab move;
+	if (game == NULL)
+		return MS_GAME_ERROR;//Gra zsta³a nieprawid³owo utworzona
+	if (IsSquareOnTheChessboard(from) == false || IsSquareOnTheChessboard(to) == false)
+		return MS_INVALID_SQUARE;//Któreœ z pól nie znajdowa³o siê na planszy
+	if (BelongsToActualPlayer(game, from)==false)
+		return MS_INVALID_PIECE;//Gracz wybra³ figurê nieprawid³owego koloru lub puste pole
+
+	//Pobieramy mo¿liwe ruchy dla figury na polu from
+	FillTheMoveTabHelper(game, Move_tab, from);
+	//Przypisujemy typ pola koñcowego
+	move = Move_tab[to.row][to.column];
+	//Sprawdzamy czy ruch jest mo¿liwy
+	switch(move)
+	{//Wykonany ruch nie powoduje zbicia i jest dozwolony
+	case MOVE_VALID://Ruch poprawny
+	case MOVE_VALID_DANGER://Figura która wykonuje ruch bêdzie znajdowaæ siê na polu zagro¿onym zbiciem
+		MakeAMove(game, from, to);
+		return MS_SUCESS_MOVE;
+	case MOVE_VALID_KILLED://Ruch powoduje zbicie figury przeciwnika
+	case MOVE_VALID_KILLED_DANGER://Ruch powoduje zbicie, figura bêdzie sta³a na polu zagro¿onym zbiciem
+		MakeAMove(game, from, to);
+		return MS_VALID_MOVE_KILLED;
+	case MOVE_IS_INVALID://ruch jest niepoprawny dla danej figury
+		return MS_INVALID_MOVE;
+	case MOVE_INVALID_KING_DANGER://Ruch spowodowa³by, ¿e aktualny gracz by³by w szachu
+		return MS_INVALID_MOVE_KING_IN_DANGER;
+	default:
+		break;
+	}
+	return MS_INVALID_MOVE;
+
+
+
 }
 
 /*Funkcja sprawdza czy figura stoj¹ca na polu sq ma jeszcze mo¿liwe ruchy
@@ -674,14 +700,14 @@ static bool HasPieceValidMoves(Game* game, Square sq)
 	{
 		for (int j = 0; j < SIZE; j++)
 		{
-			if(IsAValidMove(Move_tab[i][j]))//Szukamy pola na które mo¿emy wykonaæ ruch
+			if (IsAValidMove(Move_tab[i][j]))//Szukamy pola na które mo¿emy wykonaæ ruch
 				return true;//Gdy je znajdziemy mo¿emy wyjœæ z funkcji
 		}
 	}
 	return false;
 }
 
-/*Sprawdza czy aktualny gracz ma jeszcze mo¿liwe ruchy do wykonania 
+/*Sprawdza czy aktualny gracz ma jeszcze mo¿liwe ruchy do wykonania
 @param game aktualnie rozgrywana partia
 @return true jeœli gracz mo¿e wykonaæ ruch, false jeœli nie mo¿e wykonaæ ruchu*/
 static bool CanActualPlayerMakeAMove(Game* game)
@@ -697,18 +723,62 @@ static bool CanActualPlayerMakeAMove(Game* game)
 			if (game->Chessboard[i][j] > 0)
 			{
 				Square sq = { i, j };
-					if (HasPieceValidMoves(game, sq))
-					{
-						next = true;//Je¿eli znalexiono mo¿liwy ruch mo¿na zakoñczyæ szukanie
-						break;
+				if (HasPieceValidMoves(game, sq))
+				{
+					next = true;//Je¿eli znalexiono mo¿liwy ruch mo¿na zakoñczyæ szukanie
+					break;
 
-				    }
+				}
 			}
 		}
 	}
 	if (IsWhitePlayer == false)
 		PrepareForNextPlayerTurn(game);//Je¿eli gracz by³ czarny ponownie obracamy szachownicê
-		return next;
+	return next;
 }
+
+EndOfGame_MS IsTheEndOfGame(Game* game)
+{
+	//Jeœli aktualny gracz ma jeszcze mo¿liwe ruchy do wykonania to gra nie zosta³a zakoñczona
+	if (CanActualPlayerMakeAMove(game))
+		return CONTINIUE;
+	//Jeœli gracz nie ma ju¿ mo¿liwych ruchów to zwyciê¿y³ gracz przeciwny
+	if (IsActualPlayerInCheck(game))
+		return OPPONENT_PLAYER_WINNER;
+	//W innym przypadku gra zosta³a zakoñczona remisem
+	return DRAW;
+}
+
+Message SetMoveHelper(Game* game, Square from, movetab Move_tab)
+{
+	if (IsSquareOnTheChessboard(from))//pole nie znajdowa³o siê na szachownicy
+		return MS_INVALID_SQUARE;
+	if (IsEmpty(from, game))
+		return MS_INVALID_PIECE;//Na polu nie by³o figury
+
+	FillTheMoveTabHelper(game, Move_tab, from);
+	    return MS_GAME_SUCCESS;
+}
+
+/*	bool SaveHistoryToFile(Game * game, char* file_name) {
+		FILE* file = fopen(file_name, "w");
+
+		if (file == NULL)
+			return false;
+
+		//Tutaj funkcja zapisuj¹ca historiê do pliku
+
+		if (fclose(file) == 0) 
+		{ 
+			game->IsSaved = true;
+			return true;
+		}
+
+		return false;
+	}
+
+*/
+
+
 
 
