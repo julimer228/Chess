@@ -18,6 +18,8 @@ typedef struct history
     Square from; //pole z którego wykonywany jest ruch
     Square to; //pole na które wykonywany jest ruch
     int KilledPiece; //Jeœli podczas wykonania ruchu zosta³a zbita bierka, to tutaj zostaje zapisana jej wartoœæ, w przeciwnym wypadku 0
+    bool blackCheck;//czy czarny król jest w szachu
+    bool whiteCheck;//Czy bia³y król jest w szachu
 }HistoryElement;
 
 /**Funkcja dodaje nowy element, zawieraj¹cy informacjê o ruchu wykonanym przez gracza, na pocz¹tek listy.

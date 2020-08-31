@@ -49,17 +49,35 @@ typedef struct game_t
     HistoryElement* pHead; //wskaźnik na początek listy jednokierunkowej do której zapisywany jest przebieg rozgrywki
     char file_name[50];//nazwa pliku do którego zostanie zapisany przebieg partii, po zakończeniu gry
 }Game;
-
-typedef enum moveinformation
+/**Rodzaje możliwych ruchów na szachownicy*/
+typedef enum movetab_t
 {
-    INVALID_SQUARE,
-    INVALID_PIECE,
-    INVALID_MOVE,
-    KING_IN_DANGER,
-    KING_STILL_IN_DANGER,
-    VALID_KING_DANGER,
-    VALID_MOVE
-}MoveInformation;
+    MOVE_IS_INVALID,//ruch niepoprawny
+    MOVE_VALID_KILLED_DANGER,//ruch poprawny, nastąpi zbicie, figura będzie stała na polu zgrożonym zbiciem
+    MOVE_VALID_KILLED,//Ruch poprawny, nastąpiło zbicie
+    MOVE_VALID_DANGER,//Ruch poprawny figura stoi na polu zagrożonym zbiciem
+    MOVE_INVALID_KING_DANGER,//Ruch niepoprawny król byłby w szachu
+    MOVE_VALID//Poprawny ruch
+}MoveTab;
+
+typedef MoveTab movetab[SIZE][SIZE];
+
+/**Informacje o przebiegu gry*/
+typedef enum message_t {
+    MS_INVALID_MOVE,//Ruch jest niepoprawny
+    MS_SUCESS_MOVE,//Ruch poprawny
+    MS_INVALID_MOVE_KING_IN_DANGER,//Ruch jest niepoprawny król byłby w szachu
+    MS_VALID_MOVE_KILLED,//Ruch poprawny nastąpiło zbicie
+    MS_VALID_MOVE_DANGER_KILLED,//Ruch poprawny nastąpiło zbicie, pionek znajduje się na zagrożonym polu
+    MS_INVALID_SQUARE,//Niepoprawne pole
+    MS_INVALID_PIECE,//Niepoprawna figura
+    MS_GAME_ERROR,//Struktura reprezentująca grę nie istnieje lub została niepoprawnie zaalokowana
+    GAME_UNDO_NO_HISTORY,
+    GAME_UNDO_SUCCESS,
+    MS_GAME_SUCCESS//sukces
+} Message;
+
+
 /*-------------------------PROTOTYPY FUNKCJI--------------------------------*/
 /**Funkcja tworząca nową grę
 @warning Funkcja alokuje pamięć!*/
@@ -104,12 +122,30 @@ Player ColorOfOpponentPlayer(Game* game);
 @return true, jeśli bierka należy do aktualnego gracza w przeciwnym wypadku false*/
 bool BelongsToActualPlayer(Game* game, Square piece_square);
 
-/*Funkcja pobiera dozwolone ruchy dla figury aktualnego gracza na danym polu
+/*Funkcja pobiera dozwolone ruchy dla figury dowolnego koloru
 @param Chessboard szachownica
 @param tab tablica dozwolonych ruchów
 @param from pole z którego ma zostać wykonany ruch*/
 void GetValidMoves(chessboard Chessboard, bool tab[SIZE][SIZE], Square from);
 
+/*Funkcja przypisuje każdemu polu rodzaj ruchu jaki może zostać wykonany
+@param game aktualnie rozgrywana partia
+@param tab tablica dozwolonych ruchów
+@param sq pole z którego ma zostać wykonany ruch
+@param Move_Tab tablica z rodzajami ruchów jakie mogą zostać wykonane z pola from*/
+void FillTheMoveTab(Game* game, bool tab[SIZE][SIZE], Square sq, movetab Move_Tab);
+
+/*Funkcja sprawdza czy ruch jest poprawny (na podstawie tablicy z rodzajami ruchów)
+@param moveType rodzaj ruchu przypisany do pola
+@return true jeśli ruch jest poprawny false jeśli ruch jest niepoprawny*/
+bool IsAValidMove(MoveTab moveType);
+
+/**Główna funkcja sprawdzająca czy ruch podany przez gracza jest poprawny
+@param game aktualnie rozgrywana partia
+@param from pole z którego ma zostać wykonany ruch
+@param to pole na które ma zostać wykonany ruch
+@return wiadomość o błędzie lub o rodzaju wykonanego ruchu*/
+Message SetMove(Game* game, Square* from, Square* to);
 #endif
 
  
