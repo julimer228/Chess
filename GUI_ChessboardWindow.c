@@ -1,13 +1,13 @@
-#include "GUI_ChessboardWindow.h"
+/*#include "GUI_ChessboardWindow.h"
 
 /*Funkcja umo¿liwiaj¹ca powrót z ekranu gry do menu g³ównego*/
-static void GUI_ChessboardWindowBack()
+/*static void GUI_ChessboardWindowBack()
 {
 	GUI_UserEventPush(USER_EVENT_BACK_TO_MENU_WINDOW, NULL, NULL);
 }
 
 /*Funkcja tworzy przycisk powrotu do menu g³ównego*/
-static bool GUI_CreateWidgets(GUI_ChessboardWindow* chessboardwindow)
+///*static bool GUI_CreateWidgets(GUI_ChessboardWindow* chessboardwindow)
 {
 	//Okreœlamy miejsce w którym znajdzie siê przycisk powrotu do menu g³ównego
 	SDL_Rect BackToMenu;

@@ -69,7 +69,6 @@ typedef enum message_t {
     MS_SUCESS_MOVE,//Ruch poprawny
     MS_INVALID_MOVE_KING_IN_DANGER,//Ruch jest niepoprawny król byłby w szachu
     MS_VALID_MOVE_KILLED,//Ruch poprawny nastąpiło zbicie
-    MS_VALID_MOVE_DANGER_KILLED,//Ruch poprawny nastąpiło zbicie, pionek znajduje się na zagrożonym polu
     MS_INVALID_SQUARE,//Niepoprawne pole
     MS_INVALID_PIECE,//Niepoprawna figura
     MS_GAME_ERROR,//Struktura reprezentująca grę nie istnieje lub została niepoprawnie zaalokowana

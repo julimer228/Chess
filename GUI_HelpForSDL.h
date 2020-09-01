@@ -25,16 +25,15 @@ typedef enum gui_user_event
 	USER_EVENT_HELP, //Naciœniêcie przycisku help
 	USER_EVENT_EXIT, //Naciœniêcie przycisku exit
 	USER_EVENT_BACK_TO_MENU_WINDOW, //Naciœniêcie przycisku back
-	USER_EVENT_OK	//Naciœniêcie przycisku ok
+	USER_EVENT_OK,	//Naciœniêcie przycisku ok
+	USER_EVENT_MESSAGE//Wyœwietlenie okienka z wiadomoœci¹
 }GUI_UserEvent;
 
-/**Funkcja rozpoczynaj¹ca pracê z bibliotek¹ SDL2*/
-bool GUI_InitializeSDL2();
-
+/**Funkcja wykorzystana do obs³ugi zdarzeñ od u¿ytkownika
+@param userevent zdarzenie od u¿ytkownika
+@param a
+@param b*/
 void GUI_UserEventPush(GUI_UserEvent userevent, void* a, void* b);
-
-/**Funkcja koñcz¹ca pracê z bibliotek¹ SDL2*/
-void GUI_QuitSDL2();
 
 /*Funkcja wyœwietlaj¹ca informacjê na ekranie (messagebox)
 @param header tytu³ okna
@@ -57,12 +56,4 @@ SDL_Texture* GUI_TextureBMP(SDL_Renderer* render, char* path);
 @param return wczytana tekstura lub NULL w przypadku gdy nie uda³o siê wczytaæ tekstury*/
 SDL_Texture* GUI_TextureBMPWithoutBackground(SDL_Renderer* render, char* path, Uint8 red, Uint8 green, Uint8 blue);
 
-/*Funkcja rysuje teksturê w miejscu okreœlonym wspó³rzêdnymi x i y o okreœlonych wymiarach
-@param texture tekstura któr¹ chcemy narysowaæ
-@param renender render do którego rysujemy
-@param x wspó³rzêdna x po³o¿enia
-@param y wspó³rzêdna y po³o¿enia
-@param w szerokoœæ tekstury
-@param h wysokoœæ tekstury*/
-void renderTexture(SDL_Texture* tex, SDL_Renderer* ren, int x, int y, int w, int h);
 #endif
