@@ -1,6 +1,55 @@
 #include "GUI_Chessboard.h"
 
+/*Funkcja wyœwietlaj¹ca wiadomoœæ na ekranie który z graczy zwyciê¿y³ lub informacjê o remisie. Zwraca informacjê, czy gra zosta³a zakoñczona.
+@param Chessboard szachownica
+@return false jeœli gra nie zosta³a zakoñczona lub true jeœli gra zosta³a zakoñczona*/
+static bool GUI_EndOfGame(GUI_Chessboard *Chessboard)
+{
+	switch (IsTheEndOfGame(Chessboard->game))
+	{
+	case CONTINIUE:
+		Chessboard->game->HasGameEnded = false;
+		return false;
+	case DRAW:
+		Chessboard->game->HasGameEnded = true;
+		GUI_UserEventPush(USER_EVENT_MESSAGE, "Koniec gry", "Remis!");
+		return true;
+	case OPPONENT_PLAYER_WINNER:
+		Chessboard->game->HasGameEnded = true;
+		if(Chessboard->game->CurrentPlayer==white)
+		GUI_UserEventPush(USER_EVENT_MESSAGE, "Koniec gry", "Wygra³ gracz czarny!");
+		else GUI_UserEventPush(USER_EVENT_MESSAGE, "Koniec gry", "Wygra³ gracz bia³y!");
+		Chessboard->game->HasGameEnded = true;
+		return true;
 
+	}
+	return false;
+}
+
+/*Funkcja zwraca informacjê czy król aktualnego gracza jest w szachu
+@param Chessboard szachownica*/
+static void UpdateTheChessboard(GUI_Chessboard* Chessboard)
+{
+	//Przywracamy wartoœci pocz¹tkowe
+	Chessboard->from.column = -1;
+	Chessboard->from.row = -1;
+	Chessboard->Moves.column = -1;
+	Chessboard->Moves.row = -1;
+
+	Chessboard->game->IsSaved = false;
+
+	if (GUI_EndOfGame(Chessboard))//Jeœli gra zosta³a zakoñczona
+		return;
+
+	//Sprawdzamy czy król aktualnego gracza jest w szachu
+	if (IsActualPlayerInCheck(Chessboard->game))
+	{
+		if (Chessboard->game->CurrentPlayer == white)
+			GUI_UserEventPush(USER_EVENT_MESSAGE, "Szach!", "Bia³y król jest w szachu!");
+		else
+			GUI_UserEventPush(USER_EVENT_MESSAGE, "Szach!", "Czarny król jest w szachu!");
+	}
+}
 GUI_Widget* GUI_CreateChessboard(SDL_Renderer* renderer, SDL_Rect location, void(*ChessboardAction)(void), Game* game)
 {
 	//Je¿eli nie uda³o siê zaalokowaæ gry w pamiêci
@@ -20,22 +69,6 @@ GUI_Widget* GUI_CreateChessboard(SDL_Renderer* renderer, SDL_Rect location, void
 		return NULL;
 	}
 
-	//Tworzymy pola, ustawiamy ich wspó³rzêdne poza plansz¹
-	guichessboard->from = CreateNewSquare(-1, -1);
-	if (guichessboard->from == NULL)
-	{
-		free(guichessboard);
-		free(widget);
-		return NULL;
-	}
-	guichessboard->Moves = CreateNewSquare(-1, -1);
-	if (guichessboard->Moves == NULL)
-	{
-		free(guichessboard->from);
-		free(guichessboard);
-		free(widget);
-		return NULL;
-	}
 	//Tworzymy tekstury pionków
 	//Pionki bia³ego gracza
 	guichessboard->Pawn_white_tx = GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/pawn_white.bmp", 159, 176, 143);
@@ -70,12 +103,16 @@ GUI_Widget* GUI_CreateChessboard(SDL_Renderer* renderer, SDL_Rect location, void
 		SDL_DestroyTexture(guichessboard->Queen_black_tx);
 		SDL_DestroyTexture(guichessboard->King_white_tx);
 		SDL_DestroyTexture(guichessboard->King_black_tx);
-		free(guichessboard->from);
-		free(guichessboard->Moves);
 		free(guichessboard);
 		free(widget);
 		return NULL;
 	}
+	//Przypisujemy polom wartoœci pocz¹tkowe (poza szachownic¹)
+	guichessboard->from.column = -1;
+	guichessboard->from.row = -1;
+	guichessboard->Moves.column = -1;
+	guichessboard->Moves.row = -1;
+
 	//Przypisujemy pozosta³e pola dla szachownicy 
 	guichessboard->location = location;
 	guichessboard->game = game;
@@ -102,64 +139,6 @@ void GUI_DestroyChessboard(GUI_Widget* widget)
 	free(widget);
 }
 
-/*Funkcja obs³uguje klikniêcie lewym przyciskiem myszy w pole szachownicy
-@param guichessboard szachownica
-@param i numer wiersza w którym znajduje siê pole
-@param numer kolumny w której znajduje siê pole*/
-static void GUI_MouseButtonLeftClickSquare(GUI_Chessboard* guichessboard, int i, int j)
-{
-	//Jeœli ponownie wybrano ten sam kwadrat ruch jest nieprawid³owy
-	if (guichessboard->from->row == i && guichessboard->from->column == j)
-	{
-		guichessboard->from->row = -1;
-		guichessboard->from->column = -1;
-	}
-	else
-	{
-		//Je¿eli pionek na wybranym polu nale¿y do aktualnego gracza -> przypisz go do pola from
-		if (false)
-		{
-				guichessboard->from->row=i;
-				guichessboard->from->column=j;
-		}
-		else if (guichessboard->from->column != -1&&guichessboard->from->row!=-1)
-		{
-			Square* to=CreateNewSquare(i, j);
-			switch (true)//tutaj funkcja która sprawdza ruch
-			{
-				//Tutaj bêdzie zwracana wiadomoœæ ze struktury game
-			case INVALID_SQUARE:
-				break;
-			case INVALID_PIECE:
-				break;
-			case INVALID_MOVE:
-				break;
-			case KING_IN_DANGER:
-			case KING_STILL_IN_DANGER:
-				if (true)//Jeœli aktualny gracz jest w szachu
-				{
-					GUI_Messagebox("Chess", "King is threatened");
-				}
-				else
-				{
-					GUI_Messagebox("Chess", "King will be threatened");
-				}
-				break;
-			case VALID_KING_DANGER:
-			case VALID_MOVE:
-				//Wykonaj ruch bo szachownica siê zmieni³a i trzeba bêdzie nanieœæ zmiany
-			default:
-				break;
-			}
-
-			//Sprawdziæ czy nie ma wycieków!!!
-			AddAnElement(&guichessboard->from, &to, &guichessboard->game->pHead);
-			
-		}
-
-
-	}
-}
 /*Funkcja zwracaj¹ca wybrany kwadrat szachownicy
 @param i numer wiersza
 @param j numer kolumny
@@ -177,43 +156,160 @@ static SDL_Rect GUI_ChessboardGetSquare(int i, int j)
 	return getSquare;
 }
 
+
+/*Funkcja obs³uguje klikniêcie lewym przyciskiem myszy w pole na szachownicy
+@param guichessboard szachownica
+@param i numer wiersza w którym znajduje siê pole
+@param j numer kolumny w której znajduje siê pole*/
+static void GUI_MouseButtonLeftClick(GUI_Chessboard* guichessboard, int i, int j)
+{
+	//Jeœli klikniêto to samo pole, przywracamy wartoœci pocz¹tkowe
+	if (guichessboard->from.row == i && guichessboard->from.column == j)
+	{
+		guichessboard->from.row = -1;
+		guichessboard->from.column = -1;
+	}
+	else
+	{
+		Square sq = { i,j };
+		//Je¿eli klikniêto w pole z figur¹ aktualnego gracza to przypisz je do pola from
+		if (BelongsToActualPlayer(guichessboard->game, sq))
+			guichessboard->from = sq;
+		else if(guichessboard->from.column!=-1)//Je¿eli wybrano ju¿ poprawn¹ figurê (pole from to pole na którym stoi figura któr¹ gracz chce wykonaæ ruch
+			switch (SetMove(guichessboard->game,guichessboard->from,sq))//Pole sq to pole na które ma zostaæ wykonany ruch
+			{
+			case MS_INVALID_PIECE://niepoprawna figura
+				break;
+			case MS_INVALID_SQUARE://niepoprawne pole
+				break;
+			case MS_INVALID_MOVE://niepoprawny ruch
+				break;
+			case MS_INVALID_MOVE_KING_IN_DANGER://król w szachu
+				if (IsActualPlayerInCheck(guichessboard->game))
+					GUI_Messagebox("Niedozwolony ruch", "Twój król by³by w szachu!");
+				else
+					GUI_Messagebox("Niedozwolony ruch", "Twój król nadal jest w szachu!");
+				break;
+			case MS_VALID_MOVE_KILLED://nast¹pi³o zbicie
+			case MS_SUCESS_MOVE://inny poprawny ruch
+				UpdateTheChessboard(guichessboard); //SprawdŸ czy przeciwnik jest w szachu i wyœwietl informacjê na ekranie
+				break;
+			default:
+				break;
+			}
+
+	}
+
+
+}
+
+/*Funkcja obs³uguje klikniêcie prawym przyciskiem myszy w pole na szachownicy
+Zostaje wype³niona tabilca dozwolonych ruchów, je¿eli klikniêto w³aœciw pole.
+@param guichessboard szachownica
+@param i numer wiersza w którym znajduje siê pole
+@param j numer kolumny w której znajduje siê pole*/
+static void GUI_MouseButtonRightClick(GUI_Chessboard* guichessboard, int i, int j)
+{
+	//Klikniêto ponownie na to samo pole -> wy³¹czamy pokazywanie dozwolonych ruchów
+	if (guichessboard->Moves.row == i && guichessboard->Moves.column == j)
+	{
+		guichessboard->Moves.row = -1;
+		guichessboard->Moves.column = -1;
+	}
+	Square sq = { i,j };
+	switch (SetMoveHelper(guichessboard->game, sq, guichessboard->Move_Tab))
+	{
+	case MS_GAME_SUCCESS://Ustawiamy figurê która zosta³a klikniêta
+		guichessboard->Moves = sq;
+		break;
+	case MS_INVALID_PIECE://Naklikniêto na niew³aœciwe pole, nic nie rób
+		guichessboard->Moves.column = -1;
+		guichessboard->Moves.row = -1;
+		break;
+	}
+}
+
 void GUI_handleChessboardEvent(GUI_Widget* widget, SDL_Event* event)
 {
 	GUI_Chessboard* guichessboard = (GUI_Chessboard*)widget->gui_widget_data;
-
-	//Jeœli gra siê zakoñczy³a, mo¿emy tylko wróciæ do menu g³ównego
-	if ((guichessboard->game->HasGameEnded == false)&&(event->type!=SDL_USEREVENT||event->user.code!=USER_EVENT_BACK_TO_MENU_WINDOW))
-	return;
-
-	if (event->type == SDL_USEREVENT&&event->user.code==USER_EVENT_BACK_TO_MENU_WINDOW)
+	if (event->type == SDL_MOUSEBUTTONUP)
 	{
-			  //wróæ do okna menu ->odpowiednia funkcja
-	}
-	else if (event->type == SDL_MOUSEBUTTONUP)
-	{
-		//Tworzymy punkt o wspó³rzêdnych klikniêcia
-		SDL_Point point;
-		point.x = event->button.x;
-		point.y = event->button.y;
-
-		//Sprawdzamy czy punkt znajduje siê na szachownicy
-		if (SDL_PointInRect(&point, &guichessboard->location))
+		SDL_Point click = { .x = event->button.x, .y = event->button.y };//Przypisujemy punktowi wspó³rzêdne miejsca klikniêcia
+		if (SDL_PointInRect(&click, &guichessboard->location))//Je¿eli klikniêto w obszar zajmowany przez szachownicê
 		{
-			//Szukamy pola na szachownicy które zosta³o klikniête
+			//Szukamy pola które zosta³o klikniête
 			for (int i = 0; i < SIZE; i++)
 			{
 				for (int j = 0; j < SIZE; j++)
 				{
-					SDL_Rect square_click = GUI_ChessboardGetSquare(i, j);
-					if (SDL_PointInRect(&point, &square_click))
+					SDL_Rect sq = GUI_ChessboardGetSquare(i, j);
+					if (SDL_PointInRect(&click, &sq))
 					{
-						//Je¿eli zosta³o klikniête lewym przyciskiem myszy 
-						if (event->button.button == SDL_BUTTON_LEFT)
-							//GUI_MouseButtonLeftClickSquare();
+						if (event->button.button == SDL_BUTTON_RIGHT)
+							GUI_MouseButtonRightClick;//klikniêto prawym przyciskiem myszy
+						else if (event->button.button == SDL_BUTTON_LEFT)
+							GUI_MouseButtonLeftClick;//klikniêto lewym przyciskiem myszy
+
+						return;//klikniêcie innym przyciskiem myszy np. œrodkowym nie zostanie obs³u¿one
+							
 					}
 				}
 			}
 		}
+	}
+}
+
+/*Funkcja koloruje kwadraty ze wzglêdu na rodzaj ruchu jaki mo¿e zostaæ wykonany poprawnie wybran¹ figur¹
+@param guichessboard szachownica
+@param renderer render*/
+static void GUI_ColorTheMoveSquares(GUI_Chessboard* guichessboard, SDL_Renderer* renderer)
+{
+	//Jeœli nie zosta³o wybrane poprawne pole, nic nie rób
+	if (guichessboard->Moves.column == -1)
+		return;
+
+	//Sprawdzamy rodzaj ruchu ka¿dego pola szachownicy
+	for (int i = 0; i < SIZE; i++)
+	{
+		for (int j = 0; j < SIZE; j++)
+		{
+				switch (guichessboard->Move_Tab[i][j])
+				{
+				case MOVE_VALID://ruch poprawny kolorujemy
+					SDL_SetRenderDrawColor(renderer, 246, 246, 131, 0);
+					break;
+				case MOVE_VALID_DANGER:
+					SDL_SetRenderDrawColor(renderer, 244, 63, 48, 0);
+					break;
+				case MOVE_VALID_KILLED_DANGER:
+					SDL_SetRenderDrawColor(renderer, 63, 78, 2, 0);
+					break;
+				case MOVE_VALID_KILLED:
+					SDL_SetRenderDrawColor(renderer, 5, 255, 1, 0);
+					break;
+				case MOVE_INVALID_KING_DANGER:
+				case MOVE_IS_INVALID:
+					break;
+				default:
+					break;
+				}
+			
+
+		}
+	}
+
+}
+
+/*Funkcja koloruje wybrane pole
+@param guichessboard szachownica
+@param renderer render*/
+static void GUI_ColorChosenSquare(GUI_Chessboard* guichessboard, SDL_Renderer* renderer)
+{
+	if (guichessboard->from.row != -1)
+	{
+		SDL_SetRenderDrawColor(renderer, 186, 202, 69, 0);
+		SDL_Rect sq = GUI_ChessboardGetSquare(guichessboard->from.row, guichessboard->from.column);
+		SDL_RenderFillRect(renderer, &sq);
 	}
 }
 
@@ -227,7 +323,7 @@ static void GUI_DrawEmptyChessboard(GUI_Chessboard* guichessboard, SDL_Renderer*
 	SDL_RenderFillRect(guichessboard->renderer, &(guichessboard->location));
 
 	//Zmieniamy kolor
-	SDL_SetRenderDrawColor(renderer, 118, 150, 86, 0);
+	SDL_SetRenderDrawColor(guichessboard->renderer, 118, 150, 86, 0);
 
 	for (int i = 0; i < SIZE; i++)
 	{
@@ -237,7 +333,7 @@ static void GUI_DrawEmptyChessboard(GUI_Chessboard* guichessboard, SDL_Renderer*
 			if ((i + j) % 2 == 1)
 			{
 				SDL_Rect guisquare = GUI_ChessboardGetSquare(i, j); // tworzymy kwadrat 
-				SDL_RenderFillRect(renderer, &guisquare); //wype³niamy kolorem
+				SDL_RenderFillRect(guichessboard->renderer, &guisquare); //wype³niamy kolorem
 			}
 		}
 	}
@@ -253,11 +349,10 @@ static void GUI_DrawPieces(GUI_Chessboard* guichessboard, SDL_Renderer* renderer
 	{
 		for (int j = 0; j < SIZE; j++)
 		{
+			piece_tx = NULL; RFUJRFUJLI[;]DA K
 			//Przypisujemy liczbê odpowiadaj¹c¹ pionkowi na danym polu (lub pustemu polu)
 			int piece_number = guichessboard->game->Chessboard[i][j];
 			//Przypisujemy odpowiedni¹ teksturê lub NULL w przypadku gdy pole jest puste
-			if (piece_number < 0)//Czarne figury
-			{
 				switch(piece_number)
 				{
 					case PAWN_BLACK:
@@ -277,11 +372,9 @@ static void GUI_DrawPieces(GUI_Chessboard* guichessboard, SDL_Renderer* renderer
 						break;
 					case KING_BLACK:
 						piece_tx = guichessboard->King_black_tx;
-				}
-			}
-			else //Bia³e figury
-				switch (piece_number)
-				{
+						break;
+				case EMPTY:
+					break; WRFUJLI[;]DA K
 				case PAWN_WHITE:
 					piece_tx = guichessboard->Pawn_white_tx;
 					break;
@@ -306,7 +399,7 @@ static void GUI_DrawPieces(GUI_Chessboard* guichessboard, SDL_Renderer* renderer
 				SDL_Rect piecesquare = GUI_ChessboardGetSquare(i, j);
 				SDL_RenderCopy(renderer, piece_tx, NULL, &piecesquare);
 			}
-
+			WRFUJLI[;]DA K
 		}
 	}
 }
@@ -317,7 +410,12 @@ void GUI_DrawChessboard(GUI_Widget* widget, SDL_Renderer* renderer)
 	GUI_Chessboard* guichessboard = (GUI_Chessboard*)widget->gui_widget_data;
 	//Rysujemy pust¹ szachownicê
 	GUI_DrawEmptyChessboard(guichessboard,renderer);
+	//Kolorujemy pola ze wzglêdu na mo¿liwe ruchy (jeœli nast¹pi³o prawid³owe klikniêcie prawym przyciskiem myszy)
+	GUI_ColorTheMoveSquares(guichessboard, renderer);
+	//Kolorujemy pole na którym stoi figura wybrana lewym przyciskiem myszy
+	GUI_ColorChosenSquare(guichessboard, renderer);
 	//Rysujemy figury na szachownicy
 	GUI_DrawPieces(guichessboard, renderer);
 
 }
+WRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]AWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]AWRFUJLI[;]AWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFRFUJUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAAAAAAAWAAAAAAAAAAAAWAAAAAAAAAAAAAAAAWAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJLI[;]D K K K K KWRFUJLI[; ]DAWRFUJLI[;]DAWRFUJLI[; ]DAWRFUJAA K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K

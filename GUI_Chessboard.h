@@ -16,8 +16,10 @@ typedef struct guichessboard_t
 {
 	Game* game; //Informacje zwi¹zane z rozgrywk¹
 
-	Square* from;//Pole z którego ma zostaæ wykonany ruch
-	Square* Moves; //Pole na które ma zostaæ wykonany ruch
+	movetab Move_Tab;//Szachownica z rodzajami ruchów
+
+	Square from;//Pole z którego ma zostaæ wykonany ruch
+	Square Moves; //Pole na które ma zostaæ wykonany ruch
 
 	//Tekstury bia³ych figur
 	SDL_Texture* Pawn_white_tx;
