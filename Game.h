@@ -49,11 +49,17 @@ typedef struct game_t
     HistoryElement* pHead; //wskaźnik na początek listy jednokierunkowej do której zapisywany jest przebieg rozgrywki
     bool IsSaved;//informacja o tym czy gra została poprawnie zapisana
     char file_name[50];//nazwa pliku do którego zostanie zapisany przebieg partii, po zakończeniu gry
+
+    Square From;
+    Square To;
+    int piece_killed;
+    bool whitecheck_t;
+    bool blackcheck_t;
 }Game;
 /**Rodzaje możliwych ruchów na szachownicy*/
 typedef enum movetab_t
 {
-    MOVE_IS_INVALID,//ruch niepoprawny
+    MOVE_IS_INVALID=10,//ruch niepoprawny
     MOVE_VALID_KILLED_DANGER,//ruch poprawny, nastąpi zbicie, figura będzie stała na polu zgrożonym zbiciem
     MOVE_VALID_KILLED,//Ruch poprawny, nastąpiło zbicie
     MOVE_VALID_DANGER,//Ruch poprawny figura stoi na polu zagrożonym zbiciem
@@ -68,7 +74,7 @@ typedef enum message_t {
     MS_INVALID_MOVE,//Ruch jest niepoprawny
     MS_SUCESS_MOVE,//Ruch poprawny
     MS_INVALID_MOVE_KING_IN_DANGER,//Ruch jest niepoprawny król byłby w szachu
-    MS_VALID_MOVE_KILLED,//Ruch poprawny nastąpiło zbicie
+    MS_SUCESS_MOVE_KILLED,//Ruch poprawny nastąpiło zbicie
     MS_INVALID_SQUARE,//Niepoprawne pole
     MS_INVALID_PIECE,//Niepoprawna figura
     MS_GAME_ERROR,//Struktura reprezentująca grę nie istnieje lub została niepoprawnie zaalokowana
@@ -101,7 +107,7 @@ void SwitchPlayers(Game* new_game);
 @param player gracz*/
 bool IsKingChecked(chessboard Chessboard, Player player);
 
-/*Funkcja wykonuje ruch bierki i zamienia graczy, dodaje element do historii, sprawdza czy któryś król jest w szachu
+/*Funkcja wykonuje ruch bierki i zamienia graczy, sprawdza czy któryś król jest w szachu
 @param game aktualnie rozgrywana partia
 @param from pole z którego przesuwamy bierkę
 @param to pole na które przesuwamy bierkę*/
@@ -114,12 +120,12 @@ bool IsActualPlayerInCheck(Game* game);
 /*Funkcja zwraca kolor aktualnego gracza
 @param game aktualnie rozgrywana partia
 @return kolor aktualnego gracza*/
-Player ColorOfActualPlayer(Game* game);
+//Player ColorOfActualPlayer(Game* game);
 
 /*Funkcja zwraca kolor przeciwnego gracza
 @param game aktualnie rozgrywana partia
 @return kolor przeciwnego gracza*/
-Player ColorOfOpponentPlayer(Game* game);
+//Player ColorOfOpponentPlayer(Game* game);
 
 /*Funkcja sprawdzająca czy bierka należy do aktualnego gracza
 @param game aktualnie rozgrywana partia
