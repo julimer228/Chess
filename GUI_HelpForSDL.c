@@ -2,34 +2,19 @@
 
 bool GUI_InitializeSDL2()
 {
-    if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
         SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
         return false;
     }
     return true;
 }
-void GUI_UserEventPush(GUI_UserEvent userevent, void* a, void* b)
-{
-	//Tworzymy zdarzenie
-	SDL_Event event;
-	SDL_memset(&event, 0, sizeof(event));
-
-	event.type = SDL_USEREVENT;
-	event.user.code = userevent;
-	event.user.data1 =a;
-	event.user.data2 =b;
-
-	SDL_PushEvent(&event);
-}
 
 void GUI_Messagebox(const char* header, const char* info)
 {
-	// jeœli biblioteka SDL nie zadzia³a informacja wyœwietli siê na ekranie konsoli
 	if (SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, header, info,	NULL) < 0) 
 	{
-		printf("ERROR! messagebox creation failed: %s\n", SDL_GetError());
-		printf("Message:\n%s: %s\n", header, info);
+		printf("ERROR! Messagebox creation filed %s\n", SDL_GetError());
 	}
 }
 
@@ -39,14 +24,14 @@ SDL_Texture* GUI_TextureBMP(SDL_Renderer* render, char* path)
 	SDL_Texture* texture = NULL;
 
 	if (surface == NULL) {
-		printf("ERROR! loading BMP failed: %s\n", SDL_GetError());
+		printf("ERROR! surface was NULL %s\n", SDL_GetError());
 		return NULL;
 	}
 
 	texture = SDL_CreateTextureFromSurface(render, surface);
 	SDL_FreeSurface(surface);
 
-	if (texture == NULL) printf("ERROR! texture creation failed: %s\n", SDL_GetError());
+	if (texture == NULL) printf("ERROR! surface was NULL %s\n", SDL_GetError());
 
 	return texture;
 }
@@ -57,7 +42,7 @@ SDL_Texture* GUI_TextureBMPWithoutBackground(SDL_Renderer* render, char* path, U
 		SDL_Texture* texture = NULL;
 
 		if (surface == NULL) {
-			printf("ERROR! loading BMP failed: %s\n", SDL_GetError());
+			printf("ERROR! surface was NULL %s\n", SDL_GetError());
 			return NULL;
 		}
 
@@ -67,22 +52,46 @@ SDL_Texture* GUI_TextureBMPWithoutBackground(SDL_Renderer* render, char* path, U
 		texture = SDL_CreateTextureFromSurface(render, surface);
 		SDL_FreeSurface(surface);
 
-		if (texture == NULL) printf("ERROR! texture creation failed: %s\n", SDL_GetError());
+		if (texture == NULL) printf("ERROR! Texture was NULL %s\n", SDL_GetError());
 
 		return texture;
 	
 }
 
-
-void renderTexture(SDL_Texture* tex, SDL_Renderer* ren, int x, int y, int w, int h) 
+bool InitSDL2()
 {
-	//Setup the destination rectangle to be at the position we want
-	SDL_Rect dst;
-	dst.x = x;
-	dst.y = y;
-	dst.w = w;
-	dst.h = h;
-	SDL_RenderCopy(ren, tex, NULL, &dst);
+	if (SDL_Init(SDL_INIT_VIDEO))
+	{
+		printf("SDL_Init Error: %s", SDL_GetError());
+		return false;
+	}
+	return true;
+}
+
+SDL_Window* CreateAWindow()
+{
+	SDL_Window* window = SDL_CreateWindow("Chess",
+		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_W, WINDOW_H, SDL_WINDOW_SHOWN);
+
+	if (!window)
+	{
+		printf("SDL_CreateWindow Error: %s", SDL_GetError() );
+		SDL_Quit();
+		return NULL;
+	}
+	return window;
+}
+
+SDL_Renderer* CreateARenderer(SDL_Window*window)
+{
+	SDL_Renderer* renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_PRESENTVSYNC);
+	if (!renderer)
+	{
+		printf("SDL_CreateRenderer Error: %s", SDL_GetError());
+		SDL_Quit();
+		return NULL;
+	}
+	return renderer;
 }
 
 

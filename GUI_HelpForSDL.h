@@ -2,58 +2,44 @@
 #ifndef GUI_HELPFORSDL_H
 #define GUI_HELPFORSDL_H
 #include <SDL.h>
+#include <SDL_video.h>
 #include "Game.h"
-#include "GUI_Window.h"
 
-/*Wysokoœæ i szerokoœæ okien*/
+
+/**Wysokoœæ i szerokoœæ okien*/
 #define WINDOW_W 1024
 #define WINDOW_H 768
 
-/*Wymiary du¿ych przycisków*/
-#define BUTTON_H 72
-#define BUTTON_W 343
-
-/*Wymiary przycisku powrotu do menu g³ównego*/
-#define BUTTON_BACK_H 54
-#define BUTTON_BACK_W 226
-
-/*---WYMAGA DOPRACOWANIA!!!---*/
-/**Typ wyliczeniowy okreœlaj¹cy zdarzenia jakie mog¹ mieæ miejsce ze strony u¿ytkownika*/
-typedef enum gui_user_event
-{
-	USER_EVENT_PLAY, //Naciœniêcie przycisku play
-	USER_EVENT_HELP, //Naciœniêcie przycisku help
-	USER_EVENT_EXIT, //Naciœniêcie przycisku exit
-	USER_EVENT_BACK_TO_MENU_WINDOW, //Naciœniêcie przycisku back
-	USER_EVENT_OK,	//Naciœniêcie przycisku ok
-	USER_EVENT_MESSAGE//Wyœwietlenie okienka z wiadomoœci¹
-}GUI_UserEvent;
-
-/**Funkcja wykorzystana do obs³ugi zdarzeñ od u¿ytkownika
-@param userevent zdarzenie od u¿ytkownika
-@param a
-@param b*/
-void GUI_UserEventPush(GUI_UserEvent userevent, void* a, void* b);
-
-/*Funkcja wyœwietlaj¹ca informacjê na ekranie (messagebox)
+/**Funkcja wyœwietlaj¹ca informacjê na ekranie (messagebox)
 @param header tytu³ okna
 @param info informacja wyœwietlana w oknie*/
 void GUI_Messagebox(const char*header, const char*info);
 
-
-/*Funkcja wczytuj¹ca teksturê z pliku BMP
+/**Funkcja wczytuj¹ca teksturê z pliku BMP
 @param render mechanizm renderuj¹cy
 @param path œcie¿ka do pliku z tekstur¹
 @return wczytana tekstura lub NULL w przypadku gdy nie uda³o siê wczytaæ tekstury*/
 SDL_Texture* GUI_TextureBMP(SDL_Renderer* render, char* path);
 
-/*Funkcja wczytuj¹ca teksturê z pliku BMP, zmienia kolor t³a na przeŸroczysty
-@param render mechanizm rnderuj¹cy
+/**Funkcja wczytuj¹ca teksturê z pliku BMP, zmienia kolor t³a na przeŸroczysty
+@param render 
 @param path œcie¿ka do pliku z tekstur¹
 @param red iloœæ czerwieni w kolorze t³a
 @param green iloœæ zieleni w kolorze t³a
 @param blue iloœæ niebieskiego w kolorze t³a
 @param return wczytana tekstura lub NULL w przypadku gdy nie uda³o siê wczytaæ tekstury*/
 SDL_Texture* GUI_TextureBMPWithoutBackground(SDL_Renderer* render, char* path, Uint8 red, Uint8 green, Uint8 blue);
+
+/**Funkcja Rozpoczyna pracê z bibliotek¹ SDL, jeœli wyst¹pi³ b³¹d funkcja wypisuje na ekranie konsoli informacjê o b³êdzie
+@return true, jeœli uda³o siê poprawnie zainicjowaæ bibliotekê, w przeciwnym wypadku false*/
+bool InitSDL2();
+
+/**Funkcja tworzy okno i sprawdza czy zosta³o poprawnie utworzone
+@return okno biblioteki lub NULL jeœli nie uda³o siê utworzyæ okna*/
+SDL_Window* CreateAWindow();
+
+/**Funkcja tworzy render biblioteki i sprawdza czy zosta³ poprawnie utworzony
+@return render lub NULL jeœli nie zosta³ poprawnie utworzony*/
+SDL_Renderer* CreateARenderer(SDL_Window*window);
 
 #endif

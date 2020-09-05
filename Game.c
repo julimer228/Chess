@@ -1,8 +1,6 @@
 #include "Game.h"
-/**Funkcja zapisuje ustawienie pocz¹tkowe figur na szachownicy
-@param Chessboard szachownica na której bêd¹ rozk³adane figury
-*/
-static void InitializeTheChessboard(chessboard Chessboard)
+
+void InitializeTheChessboard(chessboard Chessboard)
 {
 	for (int i = 1; i < SIZE-1; i++)
 	{
@@ -61,28 +59,22 @@ Game* CreateGame()
 	return new_game;
 }
 
-void DestroyGame(Game** game)
+void DestroyGame(Game* game)
 {
 	if (game == NULL)
 		return;
+	RemoveFormMemory(&game->pHead);
 	free(game);
 }
 
-/*Funkcja sprawdza czy pole znajduje siê na szachownicy
-@param sq pole które chcemy sprawdziæ
-@return true, jeœli pole znajduje siê na szachownicy w przeciwnym wypadku false*/
-static bool IsSquareOnTheChessboard(Square sq)
+bool IsSquareOnTheChessboard(Square sq)
 {
 	if (sq.column < SIZE && sq.column >= 0 && sq.row >= 0 && sq.row < SIZE)
 		return true;
 	return false;
 }
 
-/*Funkcja sprawdza na które pola z pola from mo¿na wykonaæ ruch pionkiem. Jeœli ruch jest mo¿liwy zapisuje wartoœæ true w tablicy dwuwymiarowej
-@param Chessboard szachownica
-@param from, pole z którego ma zostaæ wykonany ruch
-@param tab tablica dozwolonych i niedozwolonych ruchów*/
-static void PawnMove(chessboard Chessboard, Square from, bool tab[SIZE][SIZE])
+void PawnMove(chessboard Chessboard, Square from, bool tab[SIZE][SIZE])
 {
 	if (Chessboard[from.row + 1][from.column] == EMPTY)
 	{
@@ -99,11 +91,7 @@ static void PawnMove(chessboard Chessboard, Square from, bool tab[SIZE][SIZE])
 		tab[from.row + 1][from.column - 1] = true;
 }
 
-/*Funkcja sprawdza na które pole z pola from mo¿na wykonaæ ruch wie¿¹. Jeœli ruch jest mo¿liwy zapisuje wartoœæ true w tablicy dwuwymiarowej
-@param Chessboard szachownica
-@param from, pole z którego ma zostaæ wykonany ruch
-@param tab tablica dozwolonych i niedozwolonych ruchów*/
-static void RookMove(chessboard Chessboard, Square from, bool tab[SIZE][SIZE])
+void RookMove(chessboard Chessboard, Square from, bool tab[SIZE][SIZE])
 {
 	for (int i = 1; from.row + i < SIZE; i++)
 	{
@@ -155,12 +143,7 @@ static void RookMove(chessboard Chessboard, Square from, bool tab[SIZE][SIZE])
 	}
 }
 
-
-/*Funkcja sprawdza na które pole z pola from mo¿na wykonaæ ruch skoczkiem. Jeœli ruch jest mo¿liwy zapisuje wartoœæ true w tablicy dwuwymiarowej
-@param Chessboard szachownica
-@param from, pole z którego ma zostaæ wykonany ruch
-@param tab tablica dozwolonych i niedozwolonych ruchów*/
-static void KnightMove(chessboard Chessboard, Square from, bool tab[SIZE][SIZE])
+void KnightMove(chessboard Chessboard, Square from, bool tab[SIZE][SIZE])
 {
 	if((from.row+1<SIZE)&&(from.column+2<SIZE)&&((Chessboard[from.row+1][from.column+2]==EMPTY)||(Chessboard[from.row+1][from.column+2]<0))) 
 	tab[from.row+1][from.column+2] = true;
@@ -180,12 +163,7 @@ static void KnightMove(chessboard Chessboard, Square from, bool tab[SIZE][SIZE])
 	tab[from.row-2][from.column-1] = true;
 }
 
-
-/*Funkcja sprawdza na które pole z pola from mo¿na wykonaæ ruch goñcem. Jeœli ruch jest mo¿liwy zapisuje wartoœæ true w tablicy dwuwymiarowej
-@param Chessboard szachownica
-@param from, pole z którego ma zostaæ wykonany ruch
-@param tab tablica dozwolonych i niedozwolonych ruchów*/
-static void BishopMove(chessboard Chessboard, Square from, bool tab[SIZE][SIZE])
+void BishopMove(chessboard Chessboard, Square from, bool tab[SIZE][SIZE])
 {
 	bool first_enemy = true; //Sprawdzamy czy ju¿ jakiœ pionek by³ zbity (nie mo¿emy kilku figur w jednym ruchu)
 	for (int i = 1; ((i + from.row )< SIZE)&&((from.column+i)<SIZE); i++)
@@ -241,22 +219,13 @@ static void BishopMove(chessboard Chessboard, Square from, bool tab[SIZE][SIZE])
 	}
 }
 
-
-/*Funkcja sprawdza na które pole z pola from mo¿na wykonaæ ruch hetmanem. Jeœli ruch jest mo¿liwy zapisuje wartoœæ true w tablicy dwuwymiarowej
-@param Chessboard szachownica
-@param from, pole z którego ma zostaæ wykonany ruch
-@param tab tablica dozwolonych i niedozwolonych ruchów*/
-static void QueenMove(chessboard Chessboard, Square from, bool tab[SIZE][SIZE])
+void QueenMove(chessboard Chessboard, Square from, bool tab[SIZE][SIZE])
 {
 	BishopMove(Chessboard, from, tab);
 	RookMove(Chessboard, from, tab);
 }
 
-/*Funkcja sprawdza na które pole z pola from mo¿na wykonaæ ruch królem. Jeœli ruch jest mo¿liwy zapisuje wartoœæ true w tablicy dwuwymiarowej
-@param Chessboard szachownica
-@param from, pole z którego ma zostaæ wykonany ruch
-@param tab tablica dozwolonych i niedozwolonych ruchów*/
-static void KingMove(chessboard Chessboard, Square from, bool tab[SIZE][SIZE])
+void KingMove(chessboard Chessboard, Square from, bool tab[SIZE][SIZE])
 {
 	if (from.row + 1 < SIZE)
 	{
@@ -298,12 +267,8 @@ static void KingMove(chessboard Chessboard, Square from, bool tab[SIZE][SIZE])
 	}
 	
 }
-	
-/*Zapisuje w tablicy tab wszystkie mo¿liwe ruchy bia³ej bierki stoj¹cej na polu from
-@param Chessboard szachownica
-@param tab tablica dozwolonych ruchów
-@param from pole z którego ma zostaæ wykonany ruch*/
-static void GetMovesOfTheWhitePiece(chessboard Chessboard, bool tab[SIZE][SIZE], Square from)
+
+void GetMovesOfTheWhitePiece(chessboard Chessboard, bool tab[SIZE][SIZE], Square from)
 {
 	switch (Chessboard[from.row][from.column])
 	{
@@ -324,10 +289,7 @@ static void GetMovesOfTheWhitePiece(chessboard Chessboard, bool tab[SIZE][SIZE],
 	}
 }
 
-/*Funkcja zapisuje wszystkie mo¿liwe ruchy bierek bia³ego gracza
-@param Chessboard szachownica
-@param tab tablica dozwolonych ruchów*/
-static void GetAllMovesOfTheWhitePlayer(chessboard Chessboard, bool tab[SIZE][SIZE])
+void GetAllMovesOfTheWhitePlayer(chessboard Chessboard, bool tab[SIZE][SIZE])
 {
 	for (int i = 0; i < SIZE; i++)
 	{
@@ -342,10 +304,7 @@ static void GetAllMovesOfTheWhitePlayer(chessboard Chessboard, bool tab[SIZE][SI
 	}
 }
 
-/*Funkcja obraca szachownicê o 180 stopni i zamienia kolor bierek na przeciwny. Dziêki temu mo¿na u¿ywaæ funkcji definiuj¹cych ruchy figur 
-równie¿ dla czarnego gracza
-@param Chessboar szachownica któr¹ obracamy*/
-static void TurnTheBoardChangeColor(chessboard Chessboard)
+void TurnTheBoardChangeColor(chessboard Chessboard)
 {
 	for (int i = 0; i < SIZE/2; i++)//Obracamy tylko do po³owy poniewa¿ wrócilibyœmy do tego samego ustawienia 
 	{
@@ -358,9 +317,7 @@ static void TurnTheBoardChangeColor(chessboard Chessboard)
 	}
 }
 
-/*Funkcja obraca tablicê mo¿liwych ruchów o 180 stopni
-@param tab tablica dozwolonych ruchów (bool)*/
-static void TurnTheValidMovesTab(bool tab[SIZE][SIZE])
+void TurnTheValidMovesTab(bool tab[SIZE][SIZE])
 {
 	for (int i = 0; i < SIZE / 2; i++)
 	{
@@ -373,10 +330,7 @@ static void TurnTheValidMovesTab(bool tab[SIZE][SIZE])
 	}
 }
 
-/*Funkcja zwraca pole na którym stoi czarny król
-@param Chessboard szachownica
-@return pole na którym znajduje siê król, jeœli pola nie znaleziono zwraca NULL*/
-static Square FindTheBlackKing(chessboard Chessboard)
+ Square FindTheBlackKing(chessboard Chessboard)
 {
 	Square sq = { -1,-1 };//Jeœli króla nie znaleziono zwróci pole o niedozwolonych indeksach
 	for (int i = 0; i < SIZE; i++)
@@ -387,18 +341,15 @@ static Square FindTheBlackKing(chessboard Chessboard)
 			{
 				sq.row = i;
 				sq.column = j;
+				return sq;
 				
 			}
 		}
 	}
-	return sq;
+
 }
 
-/*Funkcja sprawdza czy czarny król jest w szachu. Odnajduje czarnego króla na szachownicy, wype³nia dwuwymiarow¹ tablicê 
-tab wszystkimi dozwolonymi ruchami bia³ego gracza. Sprawdza czy bia³y gracz mo¿e wykonaæ ruch na pole zajmowane przez króla.
-@param Chessboard szachownica
-@return true jeœli czarny król jest w szachu w przeciwnym wypadku false*/
-static bool IsBlackKingChecked(chessboard Chessboard)
+bool IsBlackKingChecked(chessboard Chessboard)
 {
 	bool tab[SIZE][SIZE] = { {false} };//Tworzymy tablicê dozwolonych ruchów
 	Square BlackKingPosition = FindTheBlackKing(Chessboard);//Szukamy czarnego króla na szachownicy
@@ -409,34 +360,25 @@ static bool IsBlackKingChecked(chessboard Chessboard)
 	return false;
 }
 
-/*Funkcja sprawdza, czy czarna bierka jest zagro¿ona zbiciem przez bia³ego gracza, dzia³a analogicznie do funkcji
-wykrywaj¹cej szach czarnego króla.
-@param Chessboard szachownica
-@param black_square pole na którym stoi czarna bierka
-@return true jeœli czarna bierka jest zagro¿ona zbiciem przez bia³ego gracza w przeciwnym wypadku false*/
-static bool BlackPieceInDanger(chessboard Chessboard, Square black_square)
+bool BlackPieceInDanger(chessboard Chessboard, Square black_square)
 {
 	bool tab[SIZE][SIZE] = {{ false }};
-	if (Chessboard[black_square.row][black_square.column]<0)//Je¿eli na polu stoi czarna figura
-	GetAllMovesOfTheWhitePlayer(Chessboard, tab);
-	if (tab[black_square.row][black_square.column])
-		return true;
+	if (Chessboard[black_square.row][black_square.column] < 0)//Je¿eli na polu stoi czarna figura
+	{
+		GetAllMovesOfTheWhitePlayer(Chessboard, tab);
+		if (tab[black_square.row][black_square.column])
+			return true;
+	}
 	return false;
 }
 
-/*Funkcja pozwalaj¹ca kolejnemu graczowi wykonaæ ruch (zmienia kolor aktualnego gracza i obraca planszê o 180 stopni)
-@param game aktualnie rozgrywana partia*/
-static void PrepareForNextPlayerTurn(Game* game)
+void PrepareForNextPlayerTurn(Game* game)
 {
 	TurnTheBoardChangeColor(game->Chessboard);//Obrót planszy
 	SwitchPlayers(game);//zamiana graczy
 }
 
-/*Funkcja sprawdza czy figura stoj¹ca na polu sq jest zagro¿ona zbiciem przez figurê przciwnika
-@param Chessboard szachownica
-@param sq pole na którym stoi figura
-@return true, jeœli figura jest zagro¿ona false jeœli nie jest zagro¿ona*/
-static bool IsPieceInDanger(chessboard Chessboard, Square sq)
+bool IsPieceInDanger(chessboard Chessboard, Square sq)
 {
 	bool t = false;
 	if (Chessboard[sq.row][sq.column] < 0)//Figura na polu sq jest czarna
@@ -454,9 +396,7 @@ static bool IsPieceInDanger(chessboard Chessboard, Square sq)
 		return t;
 }
 
-/*Funkcja cofa ostatni ruch jaki zosta³ wykonany
-@param game aktualnie rozgrywana partia*/
-static DeleteLastMove(Game* game)
+ void DeleteLastMove(Game* game)
 {
 	//Przestawiamy figurê z pola to na pole from
 	game->Chessboard[game->From.row][game->From.column] = game->Chessboard[game->To.row][game->To.column];
@@ -493,32 +433,27 @@ void MakeAMove(Game* game, Square from, Square to)
 	
 }
 
-/*Funkcja sprawdza czy ruch powoduje, ¿e król jest zagro¿ony przez figurê przeciwnika lub dowolny pionek jest zagro¿ony zbiciem
-@param game aktualnie rozgrywana partia
-@param from pole z którego ma zostaæ wykonany ruch
-@param to pole na które ma zostaæ wwykonany ruch
-@param KingInDanger pole informuj¹ce czy król by³by w szachu
-@param PieceInDanger pole informuj¹ce czy bierka by³aby zagro¿ona zbiciem*/
-static void CheckIfPieceOrKingWillBeInDanger(Game* game, Square from, Square to, bool* KingInDanger, bool* PieceInDanger)
+void CheckIfPieceOrKingWillBeInDanger(Game* game, Square from, Square to, bool* KingInDanger, bool* PieceInDanger)
 {
 	MakeAMove(game, from, to);
 	if (game->Chessboard[from.row][from.column] > 0)
 	{
-		*KingInDanger = game->WhiteCheck;
+		*KingInDanger = IsKingChecked(game->Chessboard, white);
 	}
 	else if(game->Chessboard[from.row][from.column]<0)
 	{
-		*KingInDanger = game->BlackCheck;
+		*KingInDanger = IsKingChecked(game->Chessboard,black);
 	}
 
 	*PieceInDanger = IsPieceInDanger(game->Chessboard, to);
 	DeleteLastMove(game);
 }
-void SwitchPlayers(Game* new_game)
+
+void SwitchPlayers(Game* game)
 {
-	if (new_game->CurrentPlayer == white)//jeœli aktualny gracz jest bia³y zmieñ na czrnego
-		new_game->CurrentPlayer = black;
-	else new_game->CurrentPlayer = white;//aktualny gracz by³ czarny, zamiana na bia³ego
+	if (game->CurrentPlayer == white)//jeœli aktualny gracz jest bia³y zmieñ na czrnego
+		game->CurrentPlayer = black;
+	else game->CurrentPlayer = white;//aktualny gracz by³ czarny, zamiana na bia³ego
 }
 
 bool IsKingChecked(chessboard Chessboard, Player player)
@@ -530,31 +465,19 @@ bool IsKingChecked(chessboard Chessboard, Player player)
 		check = IsBlackKingChecked(Chessboard);//sprawdzamy czy czarny król jest w szachu
 		TurnTheBoardChangeColor(Chessboard);//Obracamy planszê i zmieniamy kolor
 	}
-	else check = IsBlackKingChecked(Chessboard);//Sprawdzamy czy czrny król jest w szachu
+	else if(player==black)
+	{
+		check = IsBlackKingChecked(Chessboard);//Sprawdzamy czy czarny król jest w szachu
+	}
 	return check;
 }
-
-
 
 bool IsActualPlayerInCheck(Game* game)
 {
 	if (game->CurrentPlayer == black)
-		return game->BlackCheck;
-	return game->WhiteCheck;
-}
-
-Player ColorOfActualPlayer(Game* game)
-{
-	if (game == NULL)
-		return white;
-	return game->CurrentPlayer;
-}
-
-Player ColorOfOpponentPlayer(Game* game)
-{
+		return IsKingChecked(game->Chessboard, black);
 	if (game->CurrentPlayer == white)
-		return black;
-	return white;
+		return IsKingChecked(game->Chessboard, white);
 }
 
 bool BelongsToActualPlayer(Game* game, Square piece_square)
@@ -603,7 +526,7 @@ void FillTheMoveTab(Game* game, bool tab[SIZE][SIZE], Square sq, movetab Move_Ta
 			{
 				if (game->Chessboard[i][j] != EMPTY)//Na polu na który chcemy przesun¹æ figurê stoi jakaœ bierka przeciwnika
 					PieceKilled = true;//Ruch spowoduje zbicie
-
+				else PieceKilled = false;
 				Square to = { i,j };
 				CheckIfPieceOrKingWillBeInDanger(game, sq, to, &KingInDanger,&PieceInDanger);
 
@@ -615,9 +538,9 @@ void FillTheMoveTab(Game* game, bool tab[SIZE][SIZE], Square sq, movetab Move_Ta
 				}
 				else if (PieceKilled && PieceInDanger)
 					Move_Tab[i][j] = MOVE_VALID_KILLED_DANGER;//zbicie i figura na zagro¿onym polu
-				else if (PieceKilled)
+				else if (PieceKilled&&(!PieceInDanger))
 					Move_Tab[i][j] = MOVE_VALID_KILLED;//zbicie
-				else if (PieceInDanger)
+				else if (PieceInDanger&&(!PieceKilled))
 					Move_Tab[i][j] = MOVE_VALID_DANGER;//figura na zagro¿onym polu
 				else
 					Move_Tab[i][j] = MOVE_VALID;//poprawny ruch
@@ -633,11 +556,7 @@ bool IsAValidMove(MoveTab moveType)
 	return(!(moveType == MOVE_IS_INVALID || moveType ==MOVE_INVALID_KING_DANGER) );		
 }
 
-/*Funkcja pomocnicza, wype³nia tablicê ruchów, nie potrzebuje tablicy dozwolonych ruchów jako argumentu
-@param game aktualnie rozgrywana partia
-@param Move_Tab tablica z rodzajami ruchów
-@param sq pole z którego ma zostaæ wykonany ruch*/
-static void FillTheMoveTabHelper(Game* game, movetab Move_tab, Square sq)
+void FillTheMoveTabHelper(Game* game, movetab Move_tab, Square sq)
 {
 	bool tab[SIZE][SIZE] = { {false} };//Tablica dozwolonych ruchów
 	GetValidMoves(game->Chessboard, tab, sq);//Wype³nij tablicê dozwolonych ruchów
@@ -664,9 +583,9 @@ Message SetMove(Game* game, Square from, Square to)
 	{//Wykonany ruch nie powoduje zbicia i jest dozwolony
 	case MOVE_VALID://Ruch poprawny
 	case MOVE_VALID_DANGER://Figura która wykonuje ruch bêdzie znajdowaæ siê na polu zagro¿onym zbiciem
-		AddAnElement(from, to, &game->pHead);
-		MakeAMove(game, from, to);
-		return MS_SUCESS_MOVE;
+			AddAnElement(from, to, &game->pHead);
+			MakeAMove(game, from, to);
+			return MS_SUCESS_MOVE;
 	case MOVE_VALID_KILLED://Ruch powoduje zbicie figury przeciwnika
 	case MOVE_VALID_KILLED_DANGER://Ruch powoduje zbicie, figura bêdzie sta³a na polu zagro¿onym zbiciem
 		AddAnElement(from, to, &game->pHead);
@@ -682,7 +601,7 @@ Message SetMove(Game* game, Square from, Square to)
 	return MS_INVALID_MOVE;
 }
 
-/*Funkcja sprawdza czy figura stoj¹ca na polu sq ma jeszcze mo¿liwe ruchy
+/**Funkcja sprawdza czy figura stoj¹ca na polu sq ma jeszcze mo¿liwe ruchy
 @param game aktualnie rozgrywana partia
 @param sq pole na którym stoi figura
 @return true, jeœli figura mo¿e wykonaæ dozwolony ruch w przeciwnym wypadku false*/
@@ -701,7 +620,7 @@ static bool HasPieceValidMoves(Game* game, Square sq)
 	return false;
 }
 
-/*Sprawdza czy aktualny gracz ma jeszcze mo¿liwe ruchy do wykonania
+/**Sprawdza czy aktualny gracz ma jeszcze mo¿liwe ruchy do wykonania
 @param game aktualnie rozgrywana partia
 @return true jeœli gracz mo¿e wykonaæ ruch, false jeœli nie mo¿e wykonaæ ruchu*/
 static bool CanActualPlayerMakeAMove(Game* game)
@@ -734,10 +653,14 @@ EndOfGame_MS IsTheEndOfGame(Game* game)
 {
 	//Jeœli aktualny gracz ma jeszcze mo¿liwe ruchy do wykonania to gra nie zosta³a zakoñczona
 	if (CanActualPlayerMakeAMove(game))
-		return CONTINIUE;
+		return CONTINUE;
 	//Jeœli gracz nie ma ju¿ mo¿liwych ruchów to zwyciê¿y³ gracz przeciwny
 	if (IsActualPlayerInCheck(game))
+	{
+		game->HasGameEnded = true;
 		return OPPONENT_PLAYER_WINNER;
+
+	}
 	//W innym przypadku gra zosta³a zakoñczona remisem
 	return DRAW;
 }
