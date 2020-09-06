@@ -1,40 +1,40 @@
-/**@FILE*/
+/**@file*/
 #ifndef GUI_CHESSBOARD_H
 #define GUI_CHESSBOARD_H
 #include "Game.h"
 #include "GUI_HelpForSDL.h"
 #include "History.h"
-/**D³ugoœæ krawêdzi pola szachownicy*/
+
 #define GUI_SQUARE 90
 
-/**Definujemy wspó³rzêdne lewego górnego rogu szachownicy - od tego punktu zaczniemy rysowanie*/
+
 #define START_X 20
 #define START_Y 20
 
 /**Struktura odpowiedzialna za graficzne przedstawienie szachownicy*/
 typedef struct guichessboard_t
 {
-	Game* game; //Informacje zwi¹zane z rozgrywk¹
-	movetab Move_Tab;//Szachownica z rodzajami ruchów
+	Game* game; ///<Informacje zwi¹zane z rozgrywk¹
+	movetab Move_Tab;///<Szachownica z rodzajami ruchów
 
-	Square from;//Pole z którego ma zostaæ wykonany ruch
-	Square Moves; //Pole na które ma zostaæ wykonany ruch
+	Square from;///<Pole z którego ma zostaæ wykonany ruch
+	Square Moves; ///<Pole na które ma zostaæ wykonany ruch
 
 	//Tekstury bia³ych figur
-	SDL_Texture* Pawn_white_tx;
-	SDL_Texture* Rook_white_tx;
-	SDL_Texture* Knight_white_tx;
-	SDL_Texture* Bishop_white_tx;
-	SDL_Texture* Queen_white_tx;
-	SDL_Texture* King_white_tx;
+	SDL_Texture* Pawn_white_tx;///<bia³y pion
+	SDL_Texture* Rook_white_tx;///<bia³a wie¿a
+	SDL_Texture* Knight_white_tx;///<bia³y skoczek
+	SDL_Texture* Bishop_white_tx;///<bia³y goniec
+	SDL_Texture* Queen_white_tx;///<bia³a królowa
+	SDL_Texture* King_white_tx;///<bia³y król
 
 	//Tekstury czarnych figur
-	SDL_Texture* Pawn_black_tx;
-	SDL_Texture* Rook_black_tx;
-	SDL_Texture* Bishop_black_tx;
-	SDL_Texture* Knight_black_tx;
-	SDL_Texture* Queen_black_tx;
-	SDL_Texture* King_black_tx;
+	SDL_Texture* Pawn_black_tx;///<czarny pion
+	SDL_Texture* Rook_black_tx;///<czarna wie¿a
+	SDL_Texture* Bishop_black_tx;///<czarny goniec
+	SDL_Texture* Knight_black_tx;///<czarny skoczek
+	SDL_Texture* Queen_black_tx;///<czarna królowa
+	SDL_Texture* King_black_tx;///<czarny król
 
 	SDL_Renderer* renderer; //render
 	SDL_Rect location;// po³o¿enie szachownicy w oknie

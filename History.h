@@ -1,4 +1,4 @@
-/**@FILE*/
+/**@file*/
 #ifndef HISTORY_H
 #define HISTORY_H
 #include <stdlib.h>
@@ -8,15 +8,15 @@
  /**Struktura reprezentuj¹ca pole na szachownicy*/
 typedef struct square
 {
-    int row, column;
+    int row, column;///<numer wiersza oraz numer kolumny
 }Square;
 
 /**Struktura u¿yta do zapisu przebiegu rozgrywki. Lista jednokierunkowa.*/
 typedef struct history
 {
-    struct history* pNext; //kolejny element listy
-    Square from; //pole z którego wykonywany jest ruch
-    Square to; //pole na które wykonywany jest ruch
+    struct history* pNext; ///<kolejny element listy
+    Square from; ///<pole z którego wykonywany jest ruch
+    Square to; ///<pole na które wykonywany jest ruch
 }HistoryElement;
 
 /**Funkcja dodaje nowy element, zawieraj¹cy informacjê o ruchu wykonanym przez gracza, na pocz¹tek listy.

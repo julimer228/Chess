@@ -1,4 +1,4 @@
-﻿/**@FILE*/
+﻿/**@file*/
 #ifndef GAME_H
 #define GAME_H
 #include <stdlib.h>
@@ -11,26 +11,26 @@
 /**Reprezentacja pustego pola*/
 #define EMPTY 0
 /**Reprezentacja białych figur*/
-#define PAWN_WHITE 1//pion
-#define ROOK_WHITE 2//wieża
-#define BISHOP_WHITE 3//goniec
-#define KNIGHT_WHITE 4 //skoczek
-#define QUEEN_WHITE 5 //hetman
-#define KING_WHITE 6 //król
+#define PAWN_WHITE 1///<pion
+#define ROOK_WHITE 2///<wieża
+#define BISHOP_WHITE 3///<goniec
+#define KNIGHT_WHITE 4 ///<skoczek
+#define QUEEN_WHITE 5 ///<hetman
+#define KING_WHITE 6 ///<król
 
 /**Reprezentacja czarnych figur*/
-#define PAWN_BLACK -1 //pion
-#define ROOK_BLACK -2 //wieża
-#define BISHOP_BLACK -3 //goniec
-#define KNIGHT_BLACK -4 //skoczek
-#define QUEEN_BLACK -5 //hetman
-#define KING_BLACK -6 //król
+#define PAWN_BLACK -1 ///<pion
+#define ROOK_BLACK -2 ///<wieża
+#define BISHOP_BLACK -3 ///<goniec
+#define KNIGHT_BLACK -4 ///<skoczek
+#define QUEEN_BLACK -5 ///<hetman
+#define KING_BLACK -6 ///<król
 
 /**Kolor gracza*/
 typedef enum players_t
 {
-    white,//gracz biały
-    black //gracz czarny
+    white,///<gracz biały
+    black ///<gracz czarny
 
 }Player;
 
@@ -40,52 +40,52 @@ typedef int chessboard[SIZE][SIZE];
 /**Struktura reprezentująca grę*/
 typedef struct game_t
 {
-    Player CurrentPlayer; //aktualny gracz
-    chessboard Chessboard; //szachownica
-    bool WhiteCheck; //czy biały król jest w szachu
-    bool BlackCheck; // czy czarny król jest w szachu
-    bool HasGameEnded;//zawiera informację, czy gra została zakończona
-    HistoryElement* pHead; //wskaźnik na początek listy jednokierunkowej do której zapisywany jest przebieg rozgrywki
+    Player CurrentPlayer; ///<aktualny gracz
+    chessboard Chessboard; ///<szachownica
+    bool WhiteCheck; ///<czy biały król jest w szachu
+    bool BlackCheck; ///< czy czarny król jest w szachu
+    bool HasGameEnded;///<zawiera informację, czy gra została zakończona
+    HistoryElement* pHead; ///<wskaźnik na początek listy jednokierunkowej do której zapisywany jest przebieg rozgrywki
    
  
 
-    Square From;//Poprzednie pole z którego był wykonywany ruch
-    Square To;//Poprzednie pole na które był wykonywany ruch
-    int piece_killed;//Informacja jaka figura została zbita w poprzednim ruchu
-    bool whitecheck_t;//Informacja, czy w poprzednim ruchu biały król był w szachu
-    bool blackcheck_t;//Informacja, czy w poprzednim ruchu czarny król był w szachu
+    Square From;///<Poprzednie pole z którego był wykonywany ruch
+    Square To;///<Poprzednie pole na które był wykonywany ruch
+    int piece_killed;///<Informacja jaka figura została zbita w poprzednim ruchu
+    bool whitecheck_t;///<Informacja, czy w poprzednim ruchu biały król był w szachu
+    bool blackcheck_t;///<Informacja, czy w poprzednim ruchu czarny król był w szachu
 }Game;
 
 /**Rodzaje możliwych ruchów na szachownicy*/
 typedef enum movetab_t
 {
-    MOVE_IS_INVALID,//ruch niepoprawny
-    MOVE_VALID_KILLED_DANGER,//ruch poprawny, nastąpi zbicie, figura będzie stała na polu zgrożonym zbiciem
-    MOVE_VALID_KILLED,//Ruch poprawny, nastąpiło zbicie
-    MOVE_VALID_DANGER,//Ruch poprawny figura stoi na polu zagrożonym zbiciem
-    MOVE_INVALID_KING_DANGER,//Ruch niepoprawny król byłby w szachu
-    MOVE_VALID//Poprawny ruch
+    MOVE_IS_INVALID,///<ruch niepoprawny
+    MOVE_VALID_KILLED_DANGER,///<ruch poprawny, nastąpi zbicie, figura będzie stała na polu zgrożonym zbiciem
+    MOVE_VALID_KILLED,///<Ruch poprawny, nastąpiło zbicie
+    MOVE_VALID_DANGER,///<Ruch poprawny figura stoi na polu zagrożonym zbiciem
+    MOVE_INVALID_KING_DANGER,///<Ruch niepoprawny król byłby w szachu
+    MOVE_VALID///<Poprawny ruch
 }MoveTab;
 /**Szachownica, której pola są wypełniane typami możliwych ruchów*/
 typedef MoveTab movetab[SIZE][SIZE];
 
 /**Informacje o tym jaki ruch został wykonany*/
 typedef enum message_t {
-    MS_INVALID_MOVE,//Ruch jest niepoprawny
-    MS_SUCESS_MOVE,//Ruch poprawny
-    MS_INVALID_MOVE_KING_IN_DANGER,//Ruch jest niepoprawny król byłby w szachu
-    MS_SUCESS_MOVE_KILLED,//Ruch poprawny nastąpiło zbicie
-    MS_INVALID_SQUARE,//Niepoprawne pole
-    MS_INVALID_PIECE,//Niepoprawna figura
-    MS_GAME_SUCCESS//sukces
+    MS_INVALID_MOVE,///<Ruch jest niepoprawny
+    MS_SUCESS_MOVE,///<Ruch poprawny
+    MS_INVALID_MOVE_KING_IN_DANGER,///<Ruch jest niepoprawny król byłby w szachu
+    MS_SUCESS_MOVE_KILLED,///<Ruch poprawny nastąpiło zbicie
+    MS_INVALID_SQUARE,///<Niepoprawne pole
+    MS_INVALID_PIECE,///<Niepoprawna figura
+    MS_GAME_SUCCESS///<sukces
 } Message;
 
 /**Informacja o tym czy gra została zakończona i z jakim rezultatem*/
 typedef enum endofgame_t
 {
-    CONTINUE,
-    OPPONENT_PLAYER_WINNER,
-    DRAW
+    CONTINUE,///<kontynuacja gry
+    OPPONENT_PLAYER_WINNER,///<Przeciwny gracz wygrał grę
+    DRAW///<gra zakończyła się remisem
 }EndOfGame_MS;
 
 /**Funkcja zapisuje ustawienie początkowe figur na szachownicy

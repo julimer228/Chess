@@ -1,4 +1,4 @@
-/**@FILE*/
+/**@file*/
 #ifndef GUI_HELPFORSDL_H
 #define GUI_HELPFORSDL_H
 #include <SDL.h>
@@ -6,7 +6,7 @@
 #include "Game.h"
 
 
-/**Wysokoœæ i szerokoœæ okien*/
+
 #define WINDOW_W 1024
 #define WINDOW_H 768
 
@@ -16,13 +16,13 @@
 void GUI_Messagebox(const char*header, const char*info);
 
 /**Funkcja wczytuj¹ca teksturê z pliku BMP
-@param render mechanizm renderuj¹cy
+@param render render
 @param path œcie¿ka do pliku z tekstur¹
 @return wczytana tekstura lub NULL w przypadku gdy nie uda³o siê wczytaæ tekstury*/
 SDL_Texture* GUI_TextureBMP(SDL_Renderer* render, char* path);
 
 /**Funkcja wczytuj¹ca teksturê z pliku BMP, zmienia kolor t³a na przeŸroczysty
-@param render 
+@param render render
 @param path œcie¿ka do pliku z tekstur¹
 @param red iloœæ czerwieni w kolorze t³a
 @param green iloœæ zieleni w kolorze t³a

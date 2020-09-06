@@ -1,3 +1,4 @@
+/**@file*/
 #ifndef GUI_GAME_H
 #define GUI_GAME_H
 #include "GUI_HelpForSDL.h"
@@ -7,12 +8,12 @@
 /**Struktura zawieraj¹ca wszystkie elementy potrzebne do utworzenia gry z interfejsem graficznym*/
 typedef struct guigame_t
 {
-	SDL_Window* window;//Okno w którym zostanie wyœwietlona gra
-	SDL_Renderer* renderer;//render
-	Game* game;//Logika gry
-	SDL_Texture* background_tx;//Tekstura t³a
-	SDL_Rect chessboard_location;//Miejsce w którym ma znajdowaæ siê szachownica
-	GUI_Chessboard* guichessboard;//Szachownica
+	SDL_Window* window;///<Okno w którym zostanie wyœwietlona gra
+	SDL_Renderer* renderer;///<render
+	Game* game;///<Logika gry
+	SDL_Texture* background_tx;///<Tekstura t³a
+	SDL_Rect chessboard_location;///<Miejsce w którym ma znajdowaæ siê szachownica
+	GUI_Chessboard* guichessboard;///<Szachownica
 }GUI_Game;
 
 
