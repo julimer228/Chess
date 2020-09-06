@@ -3,6 +3,7 @@
 void AddAnElement(Square from, Square to, HistoryElement** pHead)
 {
 	HistoryElement* element_t = (HistoryElement*)malloc(sizeof(HistoryElement));
+
 	element_t->from = from;
 	element_t->to = to;
 	element_t->pNext = *pHead;
@@ -25,26 +26,32 @@ void PrintOnTheScreen(HistoryElement *pHead)
 	}
 }
 
-/*void SaveToFile(HistoryElement* pHead)
+void SaveToFile(HistoryElement* pHead)
 {
 	FILE* fp; 
-		char move[7];
-		move[0] = pHead->from.column + 'A';
-		move[1] = pHead->from.row + '1';
+	if ((fp = fopen("History.txt", "w")) == NULL) {
+		printf("Error in file History.txt \n");
+		return;
+	}
+	HistoryElement* t = pHead;
+	while (t)
+	{
+		char move[8];
+		move[0] = t->from.column + 'A';
+		move[1] = t->from.row + '1';
 		move[2] = '-';
 		move[3] = '>';
-		move[4] = pHead->to.column + 'A';
-		move[5] = pHead->to.row + '1';
-		move[6] = '\0';
-	printf("%s", move);
-	if ((fp = fopen("test.txt", "w")) == NULL) {
-		printf("Error in file game_history.txt \n");
-		exit(1);
+		move[4] = t->to.column + 'A';
+		move[5] = t->to.row + '1';
+		move[6] = '\n';
+		move[7] = '\0';
+		printf("%s", move);
+		fprintf(fp, "%s", move);
+		t = t->pNext;
 	}
-	fprintf(fp, "%s", move); 
 	fclose(fp); 
-	return 0;
-}*/
+
+}
 
 static void RemoveFirstElement(HistoryElement** pHead)
 {

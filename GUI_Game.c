@@ -3,6 +3,8 @@
 GUI_Game* CreateGUI_Game()
 {
     GUI_Game* guigame = (GUI_Game*)malloc(sizeof(GUI_Game));
+    if (guigame == NULL)
+        return NULL;
     guigame->window = CreateAWindow();
     if (guigame->window == NULL)
     {
@@ -31,7 +33,7 @@ GUI_Game* CreateGUI_Game()
     guigame->guichessboard = GUI_CreateChessboard(guigame->renderer,guigame->chessboard_location, guigame->game);
     if (guigame->guichessboard == NULL)
     {
-        DestroyGame(&guigame->game);
+        DestroyGame(guigame->game);
         SDL_DestroyRenderer(guigame->renderer);
         SDL_DestroyWindow(guigame->window);
         free(guigame);
@@ -41,7 +43,7 @@ GUI_Game* CreateGUI_Game()
     if (guigame->background_tx == NULL)
     {
         GUI_DestroyChessboard(guigame->guichessboard);
-        DestroyGame(&guigame->game);
+        DestroyGame(guigame->game);
         SDL_DestroyRenderer(guigame->renderer);
         SDL_DestroyWindow(guigame->window);
         free(guigame);
@@ -61,7 +63,7 @@ void GUI_DrawGameWindow(GUI_Game* guigame, SDL_Renderer* renderer)
     SDL_RenderCopy(renderer, guigame->background_tx, NULL, &bg_location);
     GUI_DrawChessboard(guigame->guichessboard,renderer);
 
-    SDL_Rect turn_rect = { .x = 790,.y = WINDOW_H /4+20 ,.h = WINDOW_H/2,.w = 200 };
+    SDL_Rect turn_rect = { .x = 790,.y = WINDOW_H /4+36 ,.h = WINDOW_H/2+2,.w = 200 };
     if (guigame->game->CurrentPlayer == black)
     {
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
@@ -80,15 +82,17 @@ void GUI_GameDestroy(GUI_Game* guigame)
     
     if (guigame == NULL)
         return;
-    DestroyGame(guigame->game);
     GUI_DestroyChessboard(guigame->guichessboard);
+    DestroyGame(guigame->game);
     SDL_DestroyTexture(guigame->background_tx);
     SDL_DestroyRenderer(guigame->renderer);
     SDL_DestroyWindow(guigame->window);
+    free(guigame);
 }
 
 void GameRun()
 {
+
     if (InitSDL2())
     {
         GUI_Game* guigame = CreateGUI_Game();
@@ -99,7 +103,7 @@ void GameRun()
         }
 
         SDL_Event event;
-        while (guigame->guichessboard->game->HasGameEnded==false)
+        while (GUI_EndOfGame(guigame->guichessboard)==false)
         {
             GUI_DrawGameWindow(guigame, guigame->renderer);
         
@@ -110,7 +114,11 @@ void GameRun()
             {
                 
                 GUI_handleChessboardEvent(guigame->guichessboard, &event);
-          
+                if (guigame->game->WhiteCheck)
+                    printf("White check");
+                if (guigame->game->BlackCheck)
+                    printf("Black check");
+
             }
             else if (event.type == SDL_QUIT)
             {
@@ -118,7 +126,9 @@ void GameRun()
             }
             
         }
-        GUI_GameDestroy(guigame);
-        SDL_Quit();
+        SaveToFile(guigame->game->pHead);
+       GUI_GameDestroy(guigame);
+       SDL_Quit();
     }
+   
 }

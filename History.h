@@ -29,6 +29,10 @@ void AddAnElement(Square from, Square to, HistoryElement** pHead);
 @param pHead wskaünik na poczπtek listy jednokierunkowej*/
 void PrintOnTheScreen (HistoryElement *pHead);
 
+/**Funkcja zapisujπca historiÍ gry do pliku tekstowego
+@param pHead wskaünik na poczπtek listy jednokierunkowej*/
+void SaveToFile(HistoryElement* pHead);
+
 /**Usuwa listÍ jednokierunkowπ iteracyjnie od poczπtku
 @param pHead wskaünik na pierwszy element listy jednokierunkowej*/
 void RemoveFormMemory(HistoryElement **pHead);

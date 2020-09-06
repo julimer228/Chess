@@ -1,7 +1,6 @@
 /**@FILE*/
 #ifndef GUI_CHESSBOARD_H
 #define GUI_CHESSBOARD_H
-#include "GUI_Widget.h"
 #include "Game.h"
 #include "GUI_HelpForSDL.h"
 #include "History.h"
@@ -47,6 +46,10 @@ typedef struct guichessboard_t
 @return false jeœli gra nie zosta³a zakoñczona lub true jeœli gra zosta³a zakoñczona*/
 bool GUI_EndOfGame(GUI_Chessboard* Chessboard);
 
+
+/**Funkcja podœwietla pole na którym stoi król na kolor czerwony je¿eli król aktualnego gracza jest w szachu
+@param guichessboard szachownica
+@param renderer render*/
 void GUI_ColorKingSquareWhenCheck(GUI_Chessboard* guichessboard, SDL_Renderer* renderer);
 
 /**Funkcja wyœwietla okienko z informacj¹ czy król aktualnego gracza jest w szachu

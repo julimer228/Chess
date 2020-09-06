@@ -346,6 +346,7 @@ void TurnTheValidMovesTab(bool tab[SIZE][SIZE])
 			}
 		}
 	}
+	return sq;
 
 }
 
@@ -436,13 +437,15 @@ void MakeAMove(Game* game, Square from, Square to)
 void CheckIfPieceOrKingWillBeInDanger(Game* game, Square from, Square to, bool* KingInDanger, bool* PieceInDanger)
 {
 	MakeAMove(game, from, to);
-	if (game->Chessboard[from.row][from.column] > 0)
+	if (game->Chessboard[to.row][to.column] > 0)
 	{
 		*KingInDanger = IsKingChecked(game->Chessboard, white);
+
 	}
-	else if(game->Chessboard[from.row][from.column]<0)
+	else if(game->Chessboard[to.row][to.column]<0)
 	{
 		*KingInDanger = IsKingChecked(game->Chessboard,black);
+	
 	}
 
 	*PieceInDanger = IsPieceInDanger(game->Chessboard, to);
@@ -478,6 +481,7 @@ bool IsActualPlayerInCheck(Game* game)
 		return IsKingChecked(game->Chessboard, black);
 	if (game->CurrentPlayer == white)
 		return IsKingChecked(game->Chessboard, white);
+	return false;
 }
 
 bool BelongsToActualPlayer(Game* game, Square piece_square)
@@ -614,7 +618,9 @@ static bool HasPieceValidMoves(Game* game, Square sq)
 		for (int j = 0; j < SIZE; j++)
 		{
 			if (IsAValidMove(Move_tab[i][j]))//Szukamy pola na które mo¿emy wykonaæ ruch
+			{
 				return true;//Gdy je znajdziemy mo¿emy wyjœæ z funkcji
+			}
 		}
 	}
 	return false;
@@ -657,7 +663,6 @@ EndOfGame_MS IsTheEndOfGame(Game* game)
 	//Jeœli gracz nie ma ju¿ mo¿liwych ruchów to zwyciê¿y³ gracz przeciwny
 	if (IsActualPlayerInCheck(game))
 	{
-		game->HasGameEnded = true;
 		return OPPONENT_PLAYER_WINNER;
 
 	}

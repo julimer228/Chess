@@ -7,7 +7,7 @@ bool GUI_EndOfGame(GUI_Chessboard *Chessboard)
 	case CONTINUE:
 		return false;
 	case DRAW:
-		GUI_Messagebox("Endo of game", "Draw!" );
+		GUI_Messagebox("End of game", "Draw!" );
 		return true;
 	case OPPONENT_PLAYER_WINNER:
 		if(Chessboard->game->CurrentPlayer==white)
@@ -57,19 +57,19 @@ GUI_Chessboard* GUI_CreateChessboard(SDL_Renderer* renderer, SDL_Rect location, 
 	}
 	//Tworzymy tekstury pionków
 	//Pionki bia³ego gracza
-	guichessboard->Pawn_white_tx = GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/pawn_white.bmp", 159, 176, 143);
-	guichessboard->Rook_white_tx= GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/rook_white.bmp", 159, 176, 143);
-	guichessboard->Knight_white_tx= GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/knight_white.bmp", 159, 176, 143);
-	guichessboard->Bishop_white_tx= GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/bishop_white.bmp", 159, 176, 143);
-	guichessboard->Queen_white_tx= GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/queen_white.bmp", 159, 176, 143);
-	guichessboard->King_white_tx= GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/king_white.bmp", 159, 176, 143);
+	guichessboard->Pawn_white_tx = GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/pawn_white.bmp", 0, 128, 128);
+	guichessboard->Rook_white_tx= GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/rook_white.bmp", 0, 128, 128);
+	guichessboard->Knight_white_tx= GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/knight_white.bmp", 0, 128, 128);
+	guichessboard->Bishop_white_tx= GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/bishop_white.bmp", 0, 128, 128);
+	guichessboard->Queen_white_tx= GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/queen_white.bmp", 0, 127, 127);
+	guichessboard->King_white_tx= GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/king_white.bmp", 0, 128, 128);
 	//Pionki czarnego gracza
-	guichessboard->Pawn_black_tx= GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/pawn_black.bmp", 159, 176, 143);
-	guichessboard->Rook_black_tx= GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/rook_black.bmp", 159, 176, 143);
-	guichessboard->Knight_black_tx= GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/knight_black.bmp", 159, 176, 143);
-	guichessboard->Bishop_black_tx= GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/bishop_black.bmp", 159, 176, 143);
-	guichessboard->Queen_black_tx= GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/queen_black.bmp", 159, 176, 143);
-	guichessboard->King_black_tx= GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/king_black.bmp", 159, 176, 143);
+	guichessboard->Pawn_black_tx= GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/pawn_black.bmp", 0, 127, 127);
+	guichessboard->Rook_black_tx= GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/rook_black.bmp", 0, 127, 127);
+	guichessboard->Knight_black_tx= GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/knight_black.bmp", 0, 127, 127);
+	guichessboard->Bishop_black_tx= GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/bishop_black.bmp", 0, 127, 127);
+	guichessboard->Queen_black_tx= GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/queen_black.bmp", 0, 127, 127);
+	guichessboard->King_black_tx= GUI_TextureBMPWithoutBackground(renderer, "./Graphics/pieces/king_black.bmp", 0, 127, 127);
 
 	if (guichessboard->Pawn_white_tx == NULL || guichessboard->Pawn_black_tx == NULL || guichessboard->Rook_white_tx == NULL || guichessboard->Rook_black_tx == NULL
 		|| guichessboard->Knight_black_tx == NULL || guichessboard->Knight_white_tx == NULL || guichessboard->Bishop_black_tx == NULL
@@ -122,7 +122,6 @@ void GUI_DestroyChessboard(GUI_Chessboard* guichessboard)
 	SDL_DestroyTexture(guichessboard->Knight_white_tx);
 	SDL_DestroyTexture(guichessboard->Rook_black_tx);
 	SDL_DestroyTexture(guichessboard->Rook_white_tx);
-	DestroyGame(&guichessboard->game);
 	free(guichessboard);
 }
 
@@ -267,10 +266,10 @@ void GUI_ColorTheMoveSquares(GUI_Chessboard* guichessboard, SDL_Renderer* render
 					break;
 				}
 				SDL_Rect sq_rect = GUI_ChessboardGetSquare(i, j);
-				sq_rect.x += 2;
-				sq_rect.y += 2;
-				sq_rect.h -= 4;
-				sq_rect.w -= 4;
+				sq_rect.x += 4;
+				sq_rect.y += 4;
+				sq_rect.h -= 8;
+				sq_rect.w -= 8;
 				SDL_RenderFillRect(renderer, &sq_rect);
 			}
 
@@ -292,11 +291,11 @@ void GUI_ColorChosenSquare(GUI_Chessboard* guichessboard, SDL_Renderer* renderer
 void GUI_DrawEmptyChessboard(GUI_Chessboard* guichessboard, SDL_Renderer* renderer)
 {
 	// Na pocz¹tku malujemy du¿y jednokolorowy kwadrat
-	SDL_SetRenderDrawColor(guichessboard->renderer, 238, 238, 210, 0);
+	SDL_SetRenderDrawColor(guichessboard->renderer, 0, 128, 128, 0);
 	SDL_RenderFillRect(guichessboard->renderer, &(guichessboard->location));
 
 	//Zmieniamy kolor
-	SDL_SetRenderDrawColor(guichessboard->renderer, 7, 15, 86, 0);
+	SDL_SetRenderDrawColor(guichessboard->renderer, 47, 79, 79, 0);
 
 	for (int i = 0; i < SIZE; i++)
 	{
