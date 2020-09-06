@@ -44,7 +44,6 @@ Game* CreateGame()
 	new_game->BlackCheck = false;
 	new_game->WhiteCheck = false;
 	new_game->HasGameEnded = false;
-	new_game->IsSaved = false;
 	new_game->CurrentPlayer = white;
 	new_game->pHead = NULL;
 	//Ustawiamy pola dotycz¹ce ostatniego wykonanego ruchu na wartoœci pocz¹tkowe (poza szachownic¹)

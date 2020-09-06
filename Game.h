@@ -46,8 +46,8 @@ typedef struct game_t
     bool BlackCheck; // czy czarny król jest w szachu
     bool HasGameEnded;//zawiera informację, czy gra została zakończona
     HistoryElement* pHead; //wskaźnik na początek listy jednokierunkowej do której zapisywany jest przebieg rozgrywki
-    bool IsSaved;//informacja o tym czy gra została poprawnie zapisana
-    char file_name[50];//nazwa pliku do którego zostanie zapisany przebieg partii, po zakończeniu gry
+   
+ 
 
     Square From;//Poprzednie pole z którego był wykonywany ruch
     Square To;//Poprzednie pole na które był wykonywany ruch

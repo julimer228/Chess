@@ -28,7 +28,6 @@ void UpdateTheChessboard(GUI_Chessboard* Chessboard)
 	Chessboard->from.row = -1;
 	Chessboard->Moves.column = -1;
 	Chessboard->Moves.row = -1;
-	Chessboard->game->IsSaved = false;
 	if (GUI_EndOfGame(Chessboard))//Jeœli gra zosta³a zakoñczona
 		return;
 
