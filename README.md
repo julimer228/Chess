@@ -1,5 +1,5 @@
 # Chess
-A chess game for two players written in C. If player right-click on the piece, he can see the possible moves. The color of a rectangle on the right sight shows which player should move his pieces.
+A chess game for two players written in C. SDL library was used in this project. If player right-click on the piece, he can see the possible moves. The color of a rectangle on the right sight shows which player should move his pieces.
 
 (I used gimp to create sprites)
 
